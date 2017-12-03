@@ -12,4 +12,6 @@ COP3530 Project 2
 -Part 2: Iterators
 -Part 3: Hashtable-Based Maps
 -Part 4: Map Performance Comparison
-*Write 
+
+
+*Write CATCH Test Cases

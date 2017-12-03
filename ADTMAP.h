@@ -38,18 +38,7 @@ public:
     BSTLEAF () {root = nullptr;}
     //Destructor
     ~BSTLEAF () {
-        remove_node (root);
-    }
-
-    ///Does not work -> Segmentation Fault
-    void remove_node (node<key,value> * a) {
-       if (a) {
-            std::cout << a->priority << std::endl;
-            remove_node(a->left);
-            remove_node(a->right);
-            a = nullptr;
-            delete a;
-       }
+        remove_all (root);
     }
 
     void insert (key a, value b) {
@@ -139,6 +128,77 @@ public:
         if (!a->left)
             return a;
         in_order_successor(a->left);
+    }
+
+    //Additional Functions
+
+    //Returns if the map contains a value associated with the inputted key
+    bool contains (key a) {
+        if (!root)
+            return false;
+        if (equal(root->priority,a))
+            return true;
+        //Create a temporary node to traverse the list
+        node<key,value> * curr = root;
+        //While there exists node and the node is not equal to the key
+        while ((curr->right || curr->left) && !equal(curr->priority, a))
+            curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        if (equal(curr->priority, a))
+            return true;
+        else
+            return false;
+    }
+
+    //Returns if the tree is empty
+    bool is_empty () {
+        return (root ? false : true);
+    }
+
+    //Key-Value pairs can always be added to a tree
+    bool is_full () {
+        return false;
+    }
+
+    //Returns the number of key-value pairs in the map
+    size_t size () {
+        recursive_size(root);
+    }
+
+    size_t recursive_size (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return recursive_size(a->left) + recursive_size(a->right) + 1;
+    }
+
+    //Removes all of the nodes
+    void clear () {
+        remove_all (root);
+    }
+
+    void remove_all (node<key,value> *& a) {
+       if (a) {
+            //std::cout << a->priority << std::endl;
+            remove_all(a->left);
+            remove_all(a->right);
+            a = nullptr;
+            delete a;
+       }
+    }
+
+    //Returns the height of the tree
+    size_t height () {
+        return recursive_height(root);
+    }
+
+    size_t recursive_height (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+    }
+
+    //Returns the tree's balance factor
+    signed int balance () {
+        return recursive_height(root->left) - recursive_height(root->right);
     }
 
 };
@@ -265,6 +325,77 @@ public:
         in_order_successor(a->left);
     }
 
+    //Additional Functions
+
+    //Returns if the map contains a value associated with the inputted key
+    bool contains (key a) {
+        if (!root)
+            return false;
+        if (equal(root->priority,a))
+            return true;
+        //Create a temporary node to traverse the list
+        node<key,value> * curr = root;
+        //While there exists node and the node is not equal to the key
+        while ((curr->right || curr->left) && !equal(curr->priority, a))
+            curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        if (equal(curr->priority, a))
+            return true;
+        else
+            return false;
+    }
+
+    //Returns if the tree is empty
+    bool is_empty () {
+        return (root ? false : true);
+    }
+
+    //Key-Value pairs can always be added to a tree
+    bool is_full () {
+        return false;
+    }
+
+    //Returns the number of key-value pairs in the map
+    size_t size () {
+        recursive_size(root);
+    }
+
+    size_t recursive_size (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return recursive_size(a->left) + recursive_size(a->right) + 1;
+    }
+
+    //Removes all of the nodes
+    void clear () {
+        remove_all (root);
+    }
+
+    void remove_all (node<key,value> *& a) {
+       if (a) {
+            //std::cout << a->priority << std::endl;
+            remove_all(a->left);
+            remove_all(a->right);
+            a = nullptr;
+            delete a;
+       }
+    }
+
+    //Returns the height of the tree
+    size_t height () {
+        return recursive_height(root);
+    }
+
+    size_t recursive_height (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+    }
+
+    //Returns the tree's balance factor
+    signed int balance () {
+        return recursive_height(root->left) - recursive_height(root->right);
+    }
+
 
 };
 
@@ -282,17 +413,6 @@ public:
 
     //Constructor
     BSTRAND () {root = nullptr;}
-
-    //Recursive function to return the size of the tree
-    size_t size() {
-        return call_size (root);
-    }
-
-    size_t call_size (node<key,value> * a) {
-        if (!a)
-            return 0;
-        return call_size (a->left) + call_size(a->right) + 1;
-    }
 
     void insert (key a, value b) {
         //Get the 1 / N + 1 random number
@@ -426,6 +546,78 @@ public:
         in_order_successor(a->left);
     }
 
+    //Additional Functions
+
+    //Returns if the map contains a value associated with the inputted key
+    bool contains (key a) {
+        if (!root)
+            return false;
+        if (equal(root->priority,a))
+            return true;
+        //Create a temporary node to traverse the list
+        node<key,value> * curr = root;
+        //While there exists node and the node is not equal to the key
+        while ((curr->right || curr->left) && !equal(curr->priority, a))
+            curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        if (equal(curr->priority, a))
+            return true;
+        else
+            return false;
+    }
+
+    //Returns if the tree is empty
+    bool is_empty () {
+        return (root ? false : true);
+    }
+
+    //Key-Value pairs can always be added to a tree
+    bool is_full () {
+        return false;
+    }
+
+    //Returns the number of key-value pairs in the map
+    size_t size () {
+        recursive_size(root);
+    }
+
+    size_t recursive_size (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return recursive_size(a->left) + recursive_size(a->right) + 1;
+    }
+
+    //Removes all of the nodes
+    void clear () {
+        remove_all (root);
+    }
+
+    void remove_all (node<key,value> *& a) {
+       if (a) {
+            //std::cout << a->priority << std::endl;
+            remove_all(a->left);
+            remove_all(a->right);
+            a = nullptr;
+            delete a;
+       }
+    }
+
+    //Returns the height of the tree
+    size_t height () {
+        return recursive_height(root);
+    }
+
+    size_t recursive_height (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+    }
+
+    //Returns the tree's balance factor
+    signed int balance () {
+        return recursive_height(root->left) - recursive_height(root->right);
+    }
+
+
 };
 
 template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
@@ -461,14 +653,14 @@ public:
 
     //Rotate right then left
     void rl (node<key,value> *& a) {
-        ll_rotation(a->right);
-        rr_rotation(a);
+        ll(a->right);
+        rr(a);
     }
 
     //Rotate left then right
-    void (node<key,value> *& a) {
-        rr_rotation(a->left);
-        ll_rotation(a);
+    void lr (node<key,value> *& a) {
+        rr(a->left);
+        ll(a);
     }
 
     //Height of the tree
@@ -482,21 +674,44 @@ public:
         return max(calculate_height(a->left), calculate_height(a->right)) + 1;
     }
     //Balance factor of the tree
-    size_t balance () {
+    signed int balance () {
         return balance_factor(root);
     }
 
-    size_t balance_factor (node<key,value> *& a) {
-        return (height(a->left) - height(a->right));
+    signed int balance_factor (node<key,value> *& a) {
+        return (calculate_height(a->left) - calculate_height(a->right));
     }
 
     //Balance the tree on every insert
     void fixer_upper (node<key,value> *& a) {
-        size_t balance_number = balance();
+        signed int balance_number = balance_factor(a);
+        std::cout << "balance number: " << balance_number << "\n";
         //The tree is balanced or roughly balanced
         if (!balance_number || balance_number == 1 || balance_number == -1)
             return;
-
+        //See which tree is bigger with node bounding checks to avoid segmentation faults
+        //Left subtree is bigger
+        if (balance_number > 1) {
+            if (!a->left->left)
+                lr(a);
+            else if (!a->left->right)
+                ll(a);
+            else if (comp(a->left->left->priority, a->left->right->priority))
+                ll(a);
+            else
+                lr(a);
+        }
+        //Right subtree is bigger
+        else {
+            if (!a->right->right)
+                rl(a);
+            else if (!a->right->left)
+                rr(a);
+            if (comp(a->right->right->priority, a->right->left->priority))
+                rr(a);
+            else
+                rl(a);
+        }
     }
 
     void insert (key a, value b) {
@@ -506,27 +721,26 @@ public:
             root->data = b;
             return;
         }
-        node<key,value> * curr = root;
-        node<key,value> * temp = curr;
-        //Go down the tree until a leaf is reached
-        while (curr) {
-            temp = curr;
-            curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        recursive_insert (root, a, b);
+    }
+
+    void recursive_insert (node<key,value> *& curr, key a, value b) {
+        if (!curr) {
+            curr = new node<key,value> ();
+            curr->priority = a;
+            curr->data = b;
+            return;
         }
         //If the current node's priority is bigger
-        if (comp(temp->priority, a)) {
+        if (comp(curr->priority, a)) {
             //Insert the new node to the left
-            temp->left = new node<key,value> ();
-            temp->left->priority = a;
-            temp->left->data = b;
-            fixer_upper (temp);
+            recursive_insert(curr->left, a, b);
+            fixer_upper (curr);
         }
         else {
             //Insert the new node to the right
-            temp->right = new node<key,value> ();
-            temp->right->priority = a;
-            temp->right->data = b;
-            fixer_upper (temp);
+            recursive_insert(curr->right, a, b);
+            fixer_upper (curr);
         }
     }
 
@@ -587,6 +801,61 @@ public:
         if (!a->left)
             return a;
         in_order_successor(a->left);
+    }
+
+        //Additional Functions
+
+    //Returns if the map contains a value associated with the inputted key
+    bool contains (key a) {
+        if (!root)
+            return false;
+        if (equal(root->priority,a))
+            return true;
+        //Create a temporary node to traverse the list
+        node<key,value> * curr = root;
+        //While there exists node and the node is not equal to the key
+        while ((curr->right || curr->left) && !equal(curr->priority, a))
+            curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        if (equal(curr->priority, a))
+            return true;
+        else
+            return false;
+    }
+
+    //Returns if the tree is empty
+    bool is_empty () {
+        return (root ? false : true);
+    }
+
+    //Key-Value pairs can always be added to a tree
+    bool is_full () {
+        return false;
+    }
+
+    //Returns the number of key-value pairs in the map
+    size_t size () {
+        recursive_size(root);
+    }
+
+    size_t recursive_size (node<key,value> * a) {
+        if (!a)
+            return 0;
+        return recursive_size(a->left) + recursive_size(a->right) + 1;
+    }
+
+    //Removes all of the nodes
+    void clear () {
+        remove_all (root);
+    }
+
+    void remove_all (node<key,value> *& a) {
+       if (a) {
+            //std::cout << a->priority << std::endl;
+            remove_all(a->left);
+            remove_all(a->right);
+            a = nullptr;
+            delete a;
+       }
     }
 
 };

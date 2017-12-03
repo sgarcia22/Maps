@@ -22,6 +22,29 @@ struct equality  { bool operator()(key a, key b) {return a == b;} };
 
 namespace cop3530 {
 
+template <typename key, typename value>
+//Key-Value Pair Class
+class KVPair {
+
+public:
+
+    KVPair (key a, value b) : class_key (a) {
+        class_value = b;
+    }
+
+    key get_key () {
+        return class_key;
+    }
+
+    key get_value () {
+        return class_value;
+    }
+
+private:
+    const key class_key;
+    value class_value;
+};
+
 template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
 //Insert at the leaf
 class BSTLEAF {
@@ -257,6 +280,68 @@ public:
     signed int balance () {
         return recursive_height(root->left) - recursive_height(root->right);
     }
+
+    //Iterator Implementation using In-Order Traversal
+
+    ///FIX
+public:
+    template<typename keyT, typename valueT>
+    class BSTLEAF_Iter {
+    public:
+        using iterator_category = std::forward_iterator_tag;
+        using iterator_category_const = const std::forward_iterator_tag;
+        using value_type = KVPair<keyT, valueT>;
+        using self_type = BSTLEAF_Iter<keyT,valueT>;
+        using self_reference = &BSTLEAF_Iter<keyT,valueT>;
+    private:
+        node<key,value> * here;
+        value_type * arr;
+    public:
+        explicit BSTLEAF_Iter (node<key,value> * start = nullptr) : here (start) {
+            in_order_traversal(here);
+        }
+        BSTLEAF_Iter (const BSTLEAF_Iter & src) : here (src.arr) {}
+
+        value_type* in_order_traversal (node<key,value> * a) {
+            if (!a)
+                return arr;
+            if (a == here)
+                arr = new value_type [size()];
+            in_order_successor(a->left);
+            value_type temp = new value_type (root->priority, root->data);
+            arr++ = temp;
+            in_order_successor(a->right);
+        }
+
+        self_reference operator=(BSTLEAF_Iter const & src) {
+            if (this == src)
+                return *this;
+            arr = src.arr;
+            return *this;
+        }
+        //Pre-increment operator overload
+        self_reference operator++() {
+            ++arr;
+            return *this;
+        }
+        //Post-increment operator overload
+        self_reference operator++ (int) {
+            self_type temp (*this);
+            ++arr;
+            return temp;
+        }
+        bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return arr = rhs.arr;}
+        bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return arr != rhs.arr;}
+
+    };
+    //Type aliases
+    //using size_t = std::size_t;
+    using key_type = key;
+    using value_type = value;
+    using iterator = BSTLEAF_Iter<key_type, value_type>;
+    using const_iterator = BSTLEAF_Iter<key_type, value_type>;
+
+
 
 };
 
@@ -1099,8 +1184,7 @@ public:
 }
 
 ///TODO::
-    ///The Big 5
-    ///Sunday: Part 2
+    ///Today: Part 2
     ///Monday: Part 3 & Write Test Cases CATCH
     ///Tuesday: Part 4 & Write Test Cases CATCH
     ///Wednesday: Finishing Touches

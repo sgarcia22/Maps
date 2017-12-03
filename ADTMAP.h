@@ -40,6 +40,63 @@ public:
     ~BSTLEAF () {
         remove_all (root);
     }
+    ///TODO:: Test Constructors
+    //Deep Copy Constructor
+    BSTLEAF(const BSTLEAF & orig) : root (nullptr) {
+        //If no root, then exit
+        if (!orig.root)
+            return;
+
+        node<key,value> temp = orig.root;
+        root = new node<key,value> ();
+        root->priority = temp->priority;
+        root->data = temp->priority;
+
+        if (temp->left) {
+            root->left = make_copy (temp->left);
+        }
+        if (temp->right) {
+            root->right = make_copy (temp->right);
+        }
+    }
+
+    node<key,value> * make_copy (const node<key,value> * a) {
+        if (!a)
+            return nullptr;
+        node<key,value> * temp = new node<key,value>();
+        temp->priority = a->priority;
+        temp->data = a->data;
+        temp->left = make_copy(a->left);
+        temp->right = make_copy(a->right);
+        return temp;
+    }
+
+    //Copy Assignment Operator
+    BSTLEAF & operator=(const BSTLEAF &rhs) {
+        if (root)
+            this->~BSTLEAF();
+        using std::swap;
+        swap (rhs.root, root);
+        rhs.root = nullptr;
+        return * this;
+    }
+
+   //Move Constructor
+    BSTLEAF (BSTLEAF && s) noexcept : root (s.root) {
+        s.root = nullptr;
+    }
+
+    //Move Assignment Operator
+    BSTLEAF & operator=(BSTLEAF && rhs) noexcept {
+        if (this != &rhs) {
+            delete root;
+
+            using std::swap;
+            swap (rhs.root, root);
+
+            rhs.root = nullptr;
+        }
+    }
 
     void insert (key a, value b) {
         if (!root) {
@@ -217,6 +274,66 @@ public:
 
     //Constructor
     BSTROOT () {root = nullptr;}
+
+    //Destructor
+    ~BSTROOT () {remove_all(root);}
+
+    //Deep Copy Constructor
+    BSTROOT(const BSTROOT & orig) : root (nullptr) {
+        //If no root, then exit
+        if (!orig.root)
+            return;
+
+        node<key,value> temp = orig.root;
+        root = new node<key,value> ();
+        root->priority = temp->priority;
+        root->data = temp->priority;
+
+        if (temp->left) {
+            root->left = make_copy (temp->left);
+        }
+        if (temp->right) {
+            root->right = make_copy (temp->right);
+        }
+    }
+
+    node<key,value> * make_copy (const node<key,value> * a) {
+        if (!a)
+            return nullptr;
+        node<key,value> * temp = new node<key,value>();
+        temp->priority = a->priority;
+        temp->data = a->data;
+        temp->left = make_copy(a->left);
+        temp->right = make_copy(a->right);
+        return temp;
+    }
+
+    //Copy Assignment Operator
+    BSTROOT & operator=(const BSTROOT &rhs) {
+        if (root)
+            this->~BSTROOT();
+        using std::swap;
+        swap (rhs.root, root);
+        rhs.root = nullptr;
+        return * this;
+    }
+
+   //Move Constructor
+    BSTROOT (BSTROOT && s) noexcept : root (s.root) {
+        s.root = nullptr;
+    }
+
+    //Move Assignment Operator
+    BSTROOT & operator=(BSTROOT && rhs) noexcept {
+        if (this != &rhs) {
+            delete root;
+
+            using std::swap;
+            swap (rhs.root, root);
+
+            rhs.root = nullptr;
+        }
+    }
 
     //Rotate Right
     void ll (node<key,value> *& a) {
@@ -413,6 +530,66 @@ public:
 
     //Constructor
     BSTRAND () {root = nullptr;}
+
+    //Destructor
+    ~BSTRAND () {remove_all(root);}
+
+    //Deep Copy Constructor
+    BSTRAND(const BSTRAND & orig) : root (nullptr) {
+        //If no root, then exit
+        if (!orig.root)
+            return;
+
+        node<key,value> temp = orig.root;
+        root = new node<key,value> ();
+        root->priority = temp->priority;
+        root->data = temp->priority;
+
+        if (temp->left) {
+            root->left = make_copy (temp->left);
+        }
+        if (temp->right) {
+            root->right = make_copy (temp->right);
+        }
+    }
+
+    node<key,value> * make_copy (const node<key,value> * a) {
+        if (!a)
+            return nullptr;
+        node<key,value> * temp = new node<key,value>();
+        temp->priority = a->priority;
+        temp->data = a->data;
+        temp->left = make_copy(a->left);
+        temp->right = make_copy(a->right);
+        return temp;
+    }
+
+    //Copy Assignment Operator
+    BSTRAND & operator=(const BSTRAND &rhs) {
+        if (root)
+            this->~BSTRAND();
+        using std::swap;
+        swap (rhs.root, root);
+        rhs.root = nullptr;
+        return * this;
+    }
+
+   //Move Constructor
+    BSTRAND (BSTRAND && s) noexcept : root (s.root) {
+        s.root = nullptr;
+    }
+
+    //Move Assignment Operator
+    BSTRAND & operator=(BSTRAND && rhs) noexcept {
+        if (this != &rhs) {
+            delete root;
+
+            using std::swap;
+            swap (rhs.root, root);
+
+            rhs.root = nullptr;
+        }
+    }
 
     void insert (key a, value b) {
         //Get the 1 / N + 1 random number
@@ -634,6 +811,66 @@ public:
 
     //Constructor
     AVL () {root = nullptr;}
+
+    //Destructor
+    ~AVL () {remove_all(root);}
+
+    //Deep Copy Constructor
+    AVL(const AVL & orig) : root (nullptr) {
+        //If no root, then exit
+        if (!orig.root)
+            return;
+
+        node<key,value> temp = orig.root;
+        root = new node<key,value> ();
+        root->priority = temp->priority;
+        root->data = temp->priority;
+
+        if (temp->left) {
+            root->left = make_copy (temp->left);
+        }
+        if (temp->right) {
+            root->right = make_copy (temp->right);
+        }
+    }
+
+    node<key,value> * make_copy (const node<key,value> * a) {
+        if (!a)
+            return nullptr;
+        node<key,value> * temp = new node<key,value>();
+        temp->priority = a->priority;
+        temp->data = a->data;
+        temp->left = make_copy(a->left);
+        temp->right = make_copy(a->right);
+        return temp;
+    }
+
+    //Copy Assignment Operator
+    AVL & operator=(const AVL &rhs) {
+        if (root)
+            this->~AVL();
+        using std::swap;
+        swap (rhs.root, root);
+        rhs.root = nullptr;
+        return * this;
+    }
+
+   //Move Constructor
+    AVL (AVL && s) noexcept : root (s.root) {
+        s.root = nullptr;
+    }
+
+    //Move Assignment Operator
+    AVL & operator=(AVL && rhs) noexcept {
+        if (this != &rhs) {
+            delete root;
+
+            using std::swap;
+            swap (rhs.root, root);
+
+            rhs.root = nullptr;
+        }
+    }
 
     //Rotate Right
     void ll (node<key,value> *& a) {
@@ -862,9 +1099,8 @@ public:
 }
 
 ///TODO::
-    ///Finish all implementations
     ///The Big 5
-    ///Sunday: Part 1 Extra Functions, Part 2
+    ///Sunday: Part 2
     ///Monday: Part 3 & Write Test Cases CATCH
     ///Tuesday: Part 4 & Write Test Cases CATCH
     ///Wednesday: Finishing Touches

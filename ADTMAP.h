@@ -1,11 +1,11 @@
 #ifndef ADTMAP_H_INCLUDED
 #define ADTMAP_H_INCLUDED
-#define max(a,b) (a > b ? a : b)
+#define maximum(a,b) (a > b ? a : b)
 
 #include <iostream>
 #include <stdexcept>
 #include <stdlib.h> //rand()
-
+#include <queue>
 template <typename key, typename value>
 struct node {
     key priority;
@@ -28,6 +28,8 @@ class KVPair {
 
 public:
 
+    KVPair() {}
+
     KVPair (key a, value b) : class_key (a) {
         class_value = b;
     }
@@ -41,7 +43,7 @@ public:
     }
 
 private:
-    const key class_key;
+    key class_key;
     value class_value;
 };
 
@@ -273,7 +275,7 @@ public:
     size_t recursive_height (node<key,value> * a) {
         if (!a)
             return 0;
-        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+        return maximum(recursive_height(a->left), recursive_height(a->right)) + 1;
     }
 
     //Returns the tree's balance factor
@@ -292,56 +294,68 @@ public:
         using iterator_category_const = const std::forward_iterator_tag;
         using value_type = KVPair<keyT, valueT>;
         using self_type = BSTLEAF_Iter<keyT,valueT>;
-        using self_reference = &BSTLEAF_Iter<keyT,valueT>;
+        using self_reference = BSTLEAF_Iter<keyT,valueT>& ;
+        using pointer = KVPair<keyT, valueT>*;
+        using node_pointer = node<key,value>*;
     private:
         node<key,value> * here;
-        value_type * arr;
+        std::queue<node_pointer> node_queue;
+        size_t size_arr;
+
     public:
-        explicit BSTLEAF_Iter (node<key,value> * start = nullptr) : here (start) {
+        explicit BSTLEAF_Iter (node<key,value> * start = nullptr, size_t size = 0) : here (start), size_arr (size) {
             in_order_traversal(here);
+            node_queue.push (nullptr);
         }
-        BSTLEAF_Iter (const BSTLEAF_Iter & src) : here (src.arr) {}
-
-        value_type* in_order_traversal (node<key,value> * a) {
-            if (!a)
-                return arr;
-            if (a == here)
-                arr = new value_type [size()];
-            in_order_successor(a->left);
-            value_type temp = new value_type (root->priority, root->data);
-            arr++ = temp;
-            in_order_successor(a->right);
+        BSTLEAF_Iter (const BSTLEAF_Iter & src) : here (src.here), size_arr (src.size_arr) {
+            in_order_traversal(here);
+            node_queue.push (nullptr);
         }
 
+        void in_order_traversal (node<key,value> * a) {
+            if (a) {
+                in_order_traversal(a->left);
+                node_queue.push (a);
+                in_order_traversal(a->right);
+            }
+        }
+///Definitely not right -> fix
+        self_reference operator*() const {return node_queue.front()->priority;}
+        self_reference operator->() const {return node_queue.front();}
+///Not sure if right
         self_reference operator=(BSTLEAF_Iter const & src) {
             if (this == src)
                 return *this;
-            arr = src.arr;
+            node_queue.front() = src.here;
             return *this;
         }
         //Pre-increment operator overload
         self_reference operator++() {
-            ++arr;
+            node_queue.pop();
             return *this;
         }
         //Post-increment operator overload
         self_reference operator++ (int) {
             self_type temp (*this);
-            ++arr;
+            node_queue.pop();
             return temp;
         }
-        bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return arr = rhs.arr;}
-        bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return arr != rhs.arr;}
+        bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return node_queue.front() == rhs.node_queue.front();}
+        bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return node_queue.front() != rhs.node_queue.front();}
 
     };
     //Type aliases
-    //using size_t = std::size_t;
+    //using size_t = std::size_t; -> Compiler Complains
     using key_type = key;
     using value_type = value;
     using iterator = BSTLEAF_Iter<key_type, value_type>;
-    using const_iterator = BSTLEAF_Iter<key_type, value_type>;
+    using const_iterator = BSTLEAF_Iter<key_type, value_type const>;
 
+    iterator begin () {return iterator (root, size());}
+    iterator end () {return iterator (nullptr, size());}
 
+    const_iterator begin () const {return const_iterator (root, size());}
+    const_iterator end () const {return const_iterator (nullptr, size());}
 
 };
 
@@ -590,7 +604,7 @@ public:
     size_t recursive_height (node<key,value> * a) {
         if (!a)
             return 0;
-        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+        return maximum(recursive_height(a->left), recursive_height(a->right)) + 1;
     }
 
     //Returns the tree's balance factor
@@ -871,7 +885,7 @@ public:
     size_t recursive_height (node<key,value> * a) {
         if (!a)
             return 0;
-        return max(recursive_height(a->left), recursive_height(a->right)) + 1;
+        return maximum(recursive_height(a->left), recursive_height(a->right)) + 1;
     }
 
     //Returns the tree's balance factor
@@ -993,7 +1007,7 @@ public:
     size_t calculate_height (node<key,value> *& a) {
         if (!a)
             return 0;
-        return max(calculate_height(a->left), calculate_height(a->right)) + 1;
+        return maximum(calculate_height(a->left), calculate_height(a->right)) + 1;
     }
     //Balance factor of the tree
     signed int balance () {

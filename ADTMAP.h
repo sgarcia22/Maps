@@ -153,7 +153,7 @@ public:
         }
     }
 
-    key & lookup (key a) {
+    value & lookup (key a) {
         if (!root)
             throw std::runtime_error ("lookup: there are no elements in the map\n");
         if (equal(root->priority,a))
@@ -174,43 +174,117 @@ public:
             throw std::runtime_error ("remove: there are no elements in the map\n");
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
+        node<key,value> * temp = curr;
         //While there exists node and the node is not equal to the key
-        while (!equal(curr->priority, a) && curr)
+        while (!equal(curr->priority, a) && curr) {
+            temp = curr;
             curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        }
         if (!equal(curr->priority, a))
             throw std::runtime_error ("remove: the key does not equate to a value\n");
         //First Case: The node has no children
         //Just delete directly
-        if (!curr->left && !curr->right)
+        if (!curr->left && !curr->right) {
+            if (temp->right == curr) {
+                temp->right = nullptr;
+            }
+            else {
+                temp->left = nullptr;
+            }
             delete curr;
+        }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-            node<key,value> * temp = (curr->left ? curr->left : curr->right);
-            std::cout << temp->priority << std::endl;
-            if (curr == root)
-                root = temp;
+                std::cout << "HERE\n";
+            node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+            curr->priority = temp_curr->priority;
+            curr->data = temp_curr->data;
+            if (curr->left == temp_curr)
+                curr->left = nullptr;
             else
-                curr = temp;
-            temp = nullptr;
-            delete temp;
+                curr->right = nullptr;
+            delete temp_curr;
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
+
         else {
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
             curr->priority = min->priority;
-            delete min;
+            node<key,value> * parent;
+            if (curr->right == min)
+                parent = curr;
+            else if (curr->right->left == min)
+                parent = curr->right;
+            else
+                parent = in_order_successor_second(curr->right);
+            remove_node (min, parent);
         }
+        //in_order_traversal_iter (root);
     }
+
     //Find the in-order successor of a node, or the minimum of the right sub-tree
     node<key,value> * in_order_successor (node<key,value> * a) {
         if (!a->left)
             return a;
         in_order_successor(a->left);
     }
+     //Find the in-order successor of a node, or the minimum of the right sub-tree
+    node<key,value> * in_order_successor_second (node<key,value> * a) {
+        if (!a->left->left)
+            return a;
+        in_order_successor_second(a->left);
+    }
+
+    void remove_node (node<key,value> * curr, node<key,value> * parent) {
+            if (!curr)
+                return;
+            if (!curr->left && !curr->right) {
+                if (parent->right == curr) {
+                    parent->right = nullptr;
+                }
+                else {
+                    parent->left = nullptr;
+                }
+                curr = nullptr;
+                delete curr;
+            }
+            //Second Case: The node has one child
+            //Replace the current node with it's child
+            else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
+                    std::cout << "HERE: " << curr->priority << "\n";
+               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                if (parent->left == curr) {
+                    parent->left = nullptr;
+                    parent->left = (curr->left ? curr->left : curr->right);
+                }
+                else {
+                    parent->right = nullptr;
+                    parent->right = (curr->left ? curr->left : curr->right);
+                }
+            }
+            //Third Case: The node has two children
+            //Find the in-order successor and swap positions, later deleting the needed node
+            ///FIX
+            else {
+                node<key,value> * min = in_order_successor(curr->right);
+                //Swap the data of the nodes
+                curr->data = min->data;
+                curr->priority = min->priority;
+                if (curr->right == min)
+                    parent = curr;
+                else if (curr->right->left == min)
+                    parent = curr->right;
+                else
+                    parent = in_order_successor_second(curr->right);
+                remove_node (min, parent);
+            }
+
+            in_order_traversal_iter (root);
+        }
 
     //Additional Functions
 
@@ -223,9 +297,15 @@ public:
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
         //While there exists node and the node is not equal to the key
-        while ((curr->right || curr->left) && !equal(curr->priority, a))
-            curr = (comp(curr->priority, a) ? curr->left : curr->right);
-        if (equal(curr->priority, a))
+        while ((curr->right || curr->left) && !equal(curr->priority, a)) {
+            if (comp(curr->priority, a))
+                if (curr->left) curr = curr->left;
+                else break;
+            else
+                if (curr->right) curr = curr->right;
+                else break;
+        }
+        if (curr && equal(curr->priority, a))
             return true;
         else
             return false;
@@ -283,9 +363,16 @@ public:
         return recursive_height(root->left) - recursive_height(root->right);
     }
 
+     void in_order_traversal_iter (node<key,value> * a) {
+        if (a) {
+            in_order_traversal_iter(a->left);
+            std::cout << a->priority << "  ";
+            in_order_traversal_iter(a->right);
+        }
+    }
+/*
     //Iterator Implementation using In-Order Traversal
-
-    ///FIX
+///Const still does not work
 public:
     template<typename keyT, typename valueT>
     class BSTLEAF_Iter {
@@ -296,53 +383,43 @@ public:
         using self_type = BSTLEAF_Iter<keyT,valueT>;
         using self_reference = BSTLEAF_Iter<keyT,valueT>& ;
         using pointer = KVPair<keyT, valueT>*;
-        using node_pointer = node<key,value>*;
+        using node_pointer = Node<KVPair<key,value>*>*;
     private:
-        node<key,value> * here;
-        std::queue<node_pointer> node_queue;
-        size_t size_arr;
+        node_pointer curr;
 
     public:
-        explicit BSTLEAF_Iter (node<key,value> * start = nullptr, size_t size = 0) : here (start), size_arr (size) {
-            in_order_traversal(here);
-            node_queue.push (nullptr);
-        }
-        BSTLEAF_Iter (const BSTLEAF_Iter & src) : here (src.here), size_arr (src.size_arr) {
-            in_order_traversal(here);
-            node_queue.push (nullptr);
-        }
+        explicit BSTLEAF_Iter<keyT,valueT> (cop3530::SSLL<KVPair<key,value>*> * start) : curr(start) {}
+        //BSTLEAF_Iter (const BSTLEAF_Iter(node_pointer) & src) : curr (src.curr) {}
 
-        void in_order_traversal (node<key,value> * a) {
-            if (a) {
-                in_order_traversal(a->left);
-                node_queue.push (a);
-                in_order_traversal(a->right);
-            }
-        }
-///Definitely not right -> fix
-        self_reference operator*() const {return node_queue.front()->priority;}
-        self_reference operator->() const {return node_queue.front();}
-///Not sure if right
+        //Return the key
+        pointer  operator*() const {return curr->data;}
+        //Return the KVPair Object
+        pointer operator->() const {return curr->data;}
+
         self_reference operator=(BSTLEAF_Iter const & src) {
             if (this == src)
                 return *this;
-            node_queue.front() = src.here;
+            curr = src.curr;
             return *this;
         }
         //Pre-increment operator overload
         self_reference operator++() {
-            node_queue.pop();
+            curr = curr->next;
             return *this;
         }
         //Post-increment operator overload
         self_reference operator++ (int) {
             self_type temp (*this);
-            node_queue.pop();
+            curr = curr->next;
             return temp;
         }
-        bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return node_queue.front() == rhs.node_queue.front();}
-        bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {return node_queue.front() != rhs.node_queue.front();}
 
+        bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {
+            return curr == rhs.curr;
+        }
+        bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {
+			return curr != rhs.curr;
+		}
     };
     //Type aliases
     //using size_t = std::size_t; -> Compiler Complains
@@ -351,12 +428,37 @@ public:
     using iterator = BSTLEAF_Iter<key_type, value_type>;
     using const_iterator = BSTLEAF_Iter<key_type, value_type const>;
 
-    iterator begin () {return iterator (root, size());}
-    iterator end () {return iterator (nullptr, size());}
+  /*  iterator begin () {
+		Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
+		in_order_traversal_iter(root, KV_pair);
+		return iterator (KV_pair);
+    }
+    //When the list is empty the iterator has finished
+    iterator end () {
+        cop3530::SSLL<KVPair<key,value>*> * KV_pair = new cop3530::SSLL<KVPair<key,value>*> ();
+		return iterator (KV_pair);
+    }
 
-    const_iterator begin () const {return const_iterator (root, size());}
-    const_iterator end () const {return const_iterator (nullptr, size());}
+    const_iterator begin () const {
+        Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
+		in_order_traversal_iter(root, KV_pair);
+		return const_iterator (KV_pair);
+    }
+    const_iterator end () const {
+        Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
+		return const_iterator (KV_pair);
+    }
 
+    void in_order_traversal_iter (node<key,value> * a, Node<KVPair<key,value>*> *& node_iter) const {
+        if (a) {
+            in_order_traversal_iter(a->left, node_iter);
+            KVPair<key,value> * temp = new KVPair<key,value> (a->priority, a->data);
+            node_iter->data = temp;
+            node_iter = node_iter->next;
+            in_order_traversal_iter(a->right, node_iter);
+        }
+    }
+*/
 };
 
 template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
@@ -465,7 +567,6 @@ public:
 
     node<key,value> * insert_at_root(node<key,value> *& curr, key a, value b) {
         if (!curr) {
-                 std::cout << "entering\n";
             curr = new node<key,value> ();
             curr->priority = a;
             curr->data = b;
@@ -475,14 +576,15 @@ public:
             ll (curr);
         }
         else {
-            std::cout << "entering\n";
             insert_at_root(curr->right, a, b);
             rr (curr);
         }
+        in_order_traversal_iter (root);
+        std::cout << "\n\n";
         return curr;
     }
 
-    key & lookup (key a) {
+    value & lookup (key a) {
         if (!root)
             throw std::runtime_error ("lookup: there are no elements in the map\n");
         if (equal(root->priority,a))
@@ -498,48 +600,130 @@ public:
             throw std::runtime_error ("lookup: the key does not equate to a value\n");
     }
 
-    void remove (key a) {
+     void remove (key a) {
         if (!root)
             throw std::runtime_error ("remove: there are no elements in the map\n");
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
+        node<key,value> * temp = curr;
         //While there exists node and the node is not equal to the key
-        while (!equal(curr->priority, a) && curr)
+        while (!equal(curr->priority, a) && curr) {
+            temp = curr;
             curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        }
         if (!equal(curr->priority, a))
             throw std::runtime_error ("remove: the key does not equate to a value\n");
         //First Case: The node has no children
         //Just delete directly
-        if (!curr->left && !curr->right)
+        if (!curr->left && !curr->right) {
+            if (temp->right == curr) {
+                temp->right = nullptr;
+            }
+            else {
+                temp->left = nullptr;
+            }
             delete curr;
+        }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-            node<key,value> * temp = (curr->left ? curr->left : curr->right);
-            std::cout << temp->priority << std::endl;
-            if (curr == root)
-                root = temp;
+                std::cout << "HERE\n";
+            node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+            curr->priority = temp_curr->priority;
+            curr->data = temp_curr->data;
+            if (curr->left == temp_curr)
+                curr->left = nullptr;
             else
-                curr = temp;
-            temp = nullptr;
-            delete temp;
+                curr->right = nullptr;
+            delete temp_curr;
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
+
         else {
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
             curr->priority = min->priority;
-            delete min;
+            node<key,value> * parent;
+            if (curr->right == min)
+                parent = curr;
+            else if (curr->right->left == min)
+                parent = curr->right;
+            else
+                parent = in_order_successor_second(curr->right);
+            remove_node (min, parent);
         }
+        //in_order_traversal_iter (root);
     }
+
     //Find the in-order successor of a node, or the minimum of the right sub-tree
     node<key,value> * in_order_successor (node<key,value> * a) {
         if (!a->left)
             return a;
         in_order_successor(a->left);
     }
+     //Find the in-order successor of a node, or the minimum of the right sub-tree
+    node<key,value> * in_order_successor_second (node<key,value> * a) {
+        if (!a->left->left)
+            return a;
+        in_order_successor_second(a->left);
+    }
+
+    void in_order_traversal_iter (node<key,value> * a) {
+        if (a) {
+            in_order_traversal_iter(a->left);
+            std::cout << a->priority << "  ";
+            in_order_traversal_iter(a->right);
+        }
+    }
+
+    void remove_node (node<key,value> * curr, node<key,value> * parent) {
+            if (!curr)
+                return;
+            if (!curr->left && !curr->right) {
+                if (parent->right == curr) {
+                    parent->right = nullptr;
+                }
+                else {
+                    parent->left = nullptr;
+                }
+                curr = nullptr;
+                delete curr;
+            }
+            //Second Case: The node has one child
+            //Replace the current node with it's child
+            else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
+                    std::cout << "HERE: " << curr->priority << "\n";
+               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                if (parent->left == curr) {
+                    parent->left = nullptr;
+                    parent->left = (curr->left ? curr->left : curr->right);
+                }
+                else {
+                    parent->right = nullptr;
+                    parent->right = (curr->left ? curr->left : curr->right);
+                }
+            }
+            //Third Case: The node has two children
+            //Find the in-order successor and swap positions, later deleting the needed node
+            ///FIX
+            else {
+                node<key,value> * min = in_order_successor(curr->right);
+                //Swap the data of the nodes
+                curr->data = min->data;
+                curr->priority = min->priority;
+                if (curr->right == min)
+                    parent = curr;
+                else if (curr->right->left == min)
+                    parent = curr->right;
+                else
+                    parent = in_order_successor_second(curr->right);
+                remove_node (min, parent);
+            }
+
+       //     in_order_traversal_iter (root);
+        }
 
     //Additional Functions
 
@@ -552,9 +736,15 @@ public:
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
         //While there exists node and the node is not equal to the key
-        while ((curr->right || curr->left) && !equal(curr->priority, a))
-            curr = (comp(curr->priority, a) ? curr->left : curr->right);
-        if (equal(curr->priority, a))
+        while ((curr->right || curr->left) && !equal(curr->priority, a)) {
+            if (comp(curr->priority, a))
+                if (curr->left) curr = curr->left;
+                else break;
+            else
+                if (curr->right) curr = curr->right;
+                else break;
+        }
+        if (curr && equal(curr->priority, a))
             return true;
         else
             return false;
@@ -616,7 +806,7 @@ public:
 };
 
 template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
-//Insert at the root
+//Insert into the tree randomly
 class BSTRAND {
 
 private:
@@ -698,6 +888,7 @@ public:
             insert_at_root(root, a, b);
         else
             insert_at_leaf(a, b);
+        in_order_traversal_iter (root);
     }
 
     //Rotate Right
@@ -763,7 +954,7 @@ public:
         }
     }
 
-    key & lookup (key a) {
+    value & lookup (key a) {
         if (!root)
             throw std::runtime_error ("lookup: there are no elements in the map\n");
         if (equal(root->priority,a))
@@ -779,47 +970,131 @@ public:
             throw std::runtime_error ("lookup: the key does not equate to a value\n");
     }
 
-    void remove (key a) {
+     void remove (key a) {
         if (!root)
             throw std::runtime_error ("remove: there are no elements in the map\n");
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
+        node<key,value> * temp = curr;
         //While there exists node and the node is not equal to the key
-        while (!equal(curr->priority, a) && curr)
+        while (!equal(curr->priority, a) && curr) {
+            temp = curr;
             curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        }
         if (!equal(curr->priority, a))
             throw std::runtime_error ("remove: the key does not equate to a value\n");
         //First Case: The node has no children
         //Just delete directly
-        if (!curr->left && !curr->right)
+        if (!curr->left && !curr->right) {
+            if (temp->right == curr) {
+                temp->right = nullptr;
+            }
+            else {
+                temp->left = nullptr;
+            }
             delete curr;
+        }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-            node<key,value> * temp = (curr->left ? curr->left : curr->right);
-            std::cout << temp->priority << std::endl;
-            if (curr == root)
-                root = temp;
+               // std::cout << "HERE\n";
+            node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+            curr->priority = temp_curr->priority;
+            curr->data = temp_curr->data;
+            if (curr->left == temp_curr)
+                curr->left = nullptr;
             else
-                curr = temp;
-            temp = nullptr;
-            delete temp;
+                curr->right = nullptr;
+            delete temp_curr;
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
+
         else {
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
             curr->priority = min->priority;
-            delete min;
+            node<key,value> * parent;
+            if (curr->right == min)
+                parent = curr;
+            else if (curr->right->left == min)
+                parent = curr->right;
+            else
+                parent = in_order_successor_second(curr->right);
+            remove_node (min, parent);
         }
+        in_order_traversal_iter (root);
+        std::cout << std::endl;
     }
+
     //Find the in-order successor of a node, or the minimum of the right sub-tree
     node<key,value> * in_order_successor (node<key,value> * a) {
         if (!a->left)
             return a;
         in_order_successor(a->left);
+    }
+     //Find the in-order successor of a node, or the minimum of the right sub-tree
+    node<key,value> * in_order_successor_second (node<key,value> * a) {
+        if (!a->left->left)
+            return a;
+        in_order_successor_second(a->left);
+    }
+
+    void remove_node (node<key,value> * curr, node<key,value> * parent) {
+            if (!curr)
+                return;
+            if (!curr->left && !curr->right) {
+                if (parent->right == curr) {
+                    parent->right = nullptr;
+                }
+                else {
+                    parent->left = nullptr;
+                }
+                curr = nullptr;
+                delete curr;
+            }
+            //Second Case: The node has one child
+            //Replace the current node with it's child
+            else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
+                    //std::cout << "HERE: " << curr->priority << "\n";
+               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                if (parent->left == curr) {
+                    parent->left = nullptr;
+                    parent->left = (curr->left ? curr->left : curr->right);
+                }
+                else {
+                    parent->right = nullptr;
+                    parent->right = (curr->left ? curr->left : curr->right);
+                }
+            }
+            //Third Case: The node has two children
+            //Find the in-order successor and swap positions, later deleting the needed node
+            ///FIX
+            else {
+                node<key,value> * min = in_order_successor(curr->right);
+                //Swap the data of the nodes
+                curr->data = min->data;
+                curr->priority = min->priority;
+                if (curr->right == min)
+                    parent = curr;
+                else if (curr->right->left == min)
+                    parent = curr->right;
+                else
+                    parent = in_order_successor_second(curr->right);
+                remove_node (min, parent);
+            }
+
+            in_order_traversal_iter (root);
+            std::cout << std::endl;
+        }
+
+    void in_order_traversal_iter (node<key,value> * a) {
+        if (a) {
+            in_order_traversal_iter(a->left);
+            std::cout << a->priority << "  ";
+            in_order_traversal_iter(a->right);
+        }
     }
 
     //Additional Functions
@@ -833,9 +1108,15 @@ public:
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
         //While there exists node and the node is not equal to the key
-        while ((curr->right || curr->left) && !equal(curr->priority, a))
-            curr = (comp(curr->priority, a) ? curr->left : curr->right);
-        if (equal(curr->priority, a))
+        while ((curr->right || curr->left) && !equal(curr->priority, a)) {
+            if (comp(curr->priority, a))
+                if (curr->left) curr = curr->left;
+                else break;
+            else
+                if (curr->right) curr = curr->right;
+                else break;
+        }
+        if (curr && equal(curr->priority, a))
             return true;
         else
             return false;
@@ -897,7 +1178,7 @@ public:
 };
 
 template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
-//Insert at the root
+//AVL Self-Balancing Tree
 class AVL {
 
 private:
@@ -1021,7 +1302,7 @@ public:
     //Balance the tree on every insert
     void fixer_upper (node<key,value> *& a) {
         signed int balance_number = balance_factor(a);
-        std::cout << "balance number: " << balance_number << "\n";
+        //std::cout << "balance number: " << balance_number << "\n";
         //The tree is balanced or roughly balanced
         if (!balance_number || balance_number == 1 || balance_number == -1)
             return;
@@ -1080,7 +1361,7 @@ public:
         }
     }
 
-    key & lookup (key a) {
+    value & lookup (key a) {
         if (!root)
             throw std::runtime_error ("lookup: there are no elements in the map\n");
         if (equal(root->priority,a))
@@ -1096,50 +1377,124 @@ public:
             throw std::runtime_error ("lookup: the key does not equate to a value\n");
     }
 
-    void remove (key a) {
+     void remove (key a) {
         if (!root)
             throw std::runtime_error ("remove: there are no elements in the map\n");
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
+        node<key,value> * temp = curr;
         //While there exists node and the node is not equal to the key
-        while (!equal(curr->priority, a) && curr)
+        while (!equal(curr->priority, a) && curr) {
+            temp = curr;
             curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        }
         if (!equal(curr->priority, a))
             throw std::runtime_error ("remove: the key does not equate to a value\n");
         //First Case: The node has no children
         //Just delete directly
-        if (!curr->left && !curr->right)
+        if (!curr->left && !curr->right) {
+            if (temp->right == curr) {
+                temp->right = nullptr;
+            }
+            else {
+                temp->left = nullptr;
+            }
             delete curr;
+        }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-            node<key,value> * temp = (curr->left ? curr->left : curr->right);
-            std::cout << temp->priority << std::endl;
-            if (curr == root)
-                root = temp;
+                //std::cout << "HERE\n";
+            node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+            curr->priority = temp_curr->priority;
+            curr->data = temp_curr->data;
+            if (curr->left == temp_curr)
+                curr->left = nullptr;
             else
-                curr = temp;
-            temp = nullptr;
-            delete temp;
+                curr->right = nullptr;
+            delete temp_curr;
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
+
         else {
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
             curr->priority = min->priority;
-            delete min;
+            node<key,value> * parent;
+            if (curr->right == min)
+                parent = curr;
+            else if (curr->right->left == min)
+                parent = curr->right;
+            else
+                parent = in_order_successor_second(curr->right);
+            remove_node (min, parent);
         }
+        //in_order_traversal_iter (root);
     }
+
     //Find the in-order successor of a node, or the minimum of the right sub-tree
     node<key,value> * in_order_successor (node<key,value> * a) {
         if (!a->left)
             return a;
         in_order_successor(a->left);
     }
+     //Find the in-order successor of a node, or the minimum of the right sub-tree
+    node<key,value> * in_order_successor_second (node<key,value> * a) {
+        if (!a->left->left)
+            return a;
+        in_order_successor_second(a->left);
+    }
 
-        //Additional Functions
+    void remove_node (node<key,value> * curr, node<key,value> * parent) {
+            if (!curr)
+                return;
+            if (!curr->left && !curr->right) {
+                if (parent->right == curr) {
+                    parent->right = nullptr;
+                }
+                else {
+                    parent->left = nullptr;
+                }
+                curr = nullptr;
+                delete curr;
+            }
+            //Second Case: The node has one child
+            //Replace the current node with it's child
+            else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
+              //      std::cout << "HERE: " << curr->priority << "\n";
+               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                if (parent->left == curr) {
+                    parent->left = nullptr;
+                    parent->left = (curr->left ? curr->left : curr->right);
+                }
+                else {
+                    parent->right = nullptr;
+                    parent->right = (curr->left ? curr->left : curr->right);
+                }
+            }
+            //Third Case: The node has two children
+            //Find the in-order successor and swap positions, later deleting the needed node
+            ///FIX
+            else {
+                node<key,value> * min = in_order_successor(curr->right);
+                //Swap the data of the nodes
+                curr->data = min->data;
+                curr->priority = min->priority;
+                if (curr->right == min)
+                    parent = curr;
+                else if (curr->right->left == min)
+                    parent = curr->right;
+                else
+                    parent = in_order_successor_second(curr->right);
+                remove_node (min, parent);
+            }
+
+            in_order_traversal_iter (root);
+        }
+
+    //Additional Functions
 
     //Returns if the map contains a value associated with the inputted key
     bool contains (key a) {
@@ -1150,9 +1505,15 @@ public:
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
         //While there exists node and the node is not equal to the key
-        while ((curr->right || curr->left) && !equal(curr->priority, a))
-            curr = (comp(curr->priority, a) ? curr->left : curr->right);
-        if (equal(curr->priority, a))
+        while ((curr->right || curr->left) && !equal(curr->priority, a)) {
+            if (comp(curr->priority, a))
+                if (curr->left) curr = curr->left;
+                else break;
+            else
+                if (curr->right) curr = curr->right;
+                else break;
+        }
+        if (curr && equal(curr->priority, a))
             return true;
         else
             return false;
@@ -1195,6 +1556,15 @@ public:
     }
 
 };
+
+
+
+template <typename key, typename value, typename COMPARE = compare<key>, typename EQUALITY = equality<key>>
+//Hash Map with Open Addressing
+class HASHOPEN {
+
+};
+
 }
 
 ///TODO::

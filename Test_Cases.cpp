@@ -3,15 +3,25 @@
 
 #include <iostream>
 #include "catch.hpp"
-#include "ADTMAP.h"
-//#include "BSTLEAF.h"
-//#include "BSTROOT.h"
-//#include "BSTRAND.h"
-//#include "AVL.h"
+//#include "ADTMAP.h"
+#include "BSTLEAF.h"
+#include "BSTROOT.h"
+#include "BSTRAND.h"
+#include "AVL.h"
+
+template <typename element>
+bool compare (element a, element b) {
+    return (a > b ? true : false);
+}
+
+template <typename element>
+bool equality (element a, element b) {
+    return (a == b);
+}
 
 TEST_CASE( "BSTLEAF" ) {
 
-    cop3530::BSTLEAF<int,int> * bst = new cop3530::BSTLEAF<int,int> ();
+    cop3530::BSTLEAF<int,int, &compare, &equality> * bst = new cop3530::BSTLEAF<int,int, &compare, &equality> ();
 
     bst->insert(5,3);
 
@@ -104,7 +114,7 @@ TEST_CASE( "BSTLEAF" ) {
 
 TEST_CASE( "BSTROOT" ) {
 
-    cop3530::BSTROOT<char,int> * bst = new cop3530::BSTROOT<char,int> ();
+    cop3530::BSTROOT<char,int, &compare, &equality> * bst = new cop3530::BSTROOT<char,int, &compare, &equality> ();
 
     bst->insert('a',3);
 
@@ -187,7 +197,7 @@ TEST_CASE( "BSTROOT" ) {
 
 TEST_CASE( "BSTRAND" ) {
 
-    cop3530::BSTRAND<char,int> * bst = new cop3530::BSTRAND<char,int> ();
+    cop3530::BSTRAND<char,int, &compare, &equality> * bst = new cop3530::BSTRAND<char,int, &compare, &equality> ();
 
     bst->insert('a',3);
 
@@ -249,7 +259,7 @@ TEST_CASE( "BSTRAND" ) {
 
 TEST_CASE( "AVL" ) {
 
-    cop3530::AVL<int,int> * bst = new cop3530::AVL<int,int> ();
+    cop3530::AVL<int,int, &compare, &equality> * bst = new cop3530::AVL<int,int, &compare, &equality> ();
 
     REQUIRE (bst->is_empty());
 
@@ -343,5 +353,11 @@ TEST_CASE( "AVL" ) {
     REQUIRE (bst->balance() == 0);
 
     delete bst;
+
+}
+
+TEST_CASE( "BSTLEAF_ITER" ) {
+
+
 
 }

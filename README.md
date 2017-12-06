@@ -8,10 +8,7 @@ COP3530 Project 2
 -AVL: inserts then balances
 
 //TODO::
--Big 5 Constructors/Destructor
--Part 2: Iterators
+-Part 2: Iterators -> Not working, problem with const
 -Part 3: Hashtable-Based Maps
--Part 4: Map Performance Comparison
 
-
-*Write CATCH Test Cases
+*Finish CATCH Test Cases & Thoroughly Test

@@ -181,7 +181,6 @@ TEST_CASE( "BSTROOT" ) {
   //  REQUIRE (bst->height() == 4);
     REQUIRE (bst->balance() == 2);
 
-
     delete bst;
 
 }
@@ -238,11 +237,110 @@ TEST_CASE( "BSTRAND" ) {
     REQUIRE (bst->size() == 6);
 
     bst->remove('h');
-    REQUIRE (bst->size() == 5); ///Error: Size == 1
+    REQUIRE (bst->size() == 5);
 
     bst->insert('e', 1);
     bst->insert('g', 5);
     REQUIRE (bst->size() == 7);
+
+    delete bst;
+
+}
+
+TEST_CASE( "AVL" ) {
+
+    cop3530::AVL<int,int> * bst = new cop3530::AVL<int,int> ();
+
+    REQUIRE (bst->is_empty());
+
+    bst->insert(50,3);
+    REQUIRE (bst->size() == 1);
+    REQUIRE (bst->height() == 1);
+    REQUIRE (bst->balance() == 0);
+
+    REQUIRE (!bst->is_empty());
+
+    bst->insert(55,10);
+    REQUIRE (bst->size() == 2);
+    REQUIRE (bst->height() == 2);
+    REQUIRE (bst->balance() == -1);
+
+    bst->insert(52,12);
+    REQUIRE (bst->size() == 3);
+    REQUIRE (bst->height() == 2);
+    REQUIRE (bst->balance() == 0);
+
+    REQUIRE (bst->contains(52));
+    REQUIRE (bst->contains(55));
+    REQUIRE (bst->contains(50));
+    REQUIRE (!bst->contains(45));
+
+    bst->insert(49,4);
+    REQUIRE (bst->size() == 4);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == 1);
+
+    bst->insert(48,56);
+    REQUIRE (bst->size() == 5);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == 1);
+
+    bst->insert(40,56);
+    REQUIRE (bst->size() == 6);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == 0);
+
+    bst->insert(100,100);
+    REQUIRE (bst->size() == 7);
+    REQUIRE (bst->height() == 4);
+    REQUIRE (bst->balance() == -1);
+
+    bst->insert(90,90);
+    REQUIRE (bst->size() == 8);
+    REQUIRE (bst->height() == 4);
+    REQUIRE (bst->balance() == -1);
+
+    REQUIRE (!bst->is_empty());
+    REQUIRE (bst->contains(90));
+    REQUIRE (bst->contains(100));
+    REQUIRE (bst->contains(52));
+    REQUIRE (!bst->contains(1000));
+    REQUIRE (!bst->contains(2));
+
+    REQUIRE (bst->lookup(48) == 56);
+    REQUIRE (bst->lookup(49) == 4);
+    REQUIRE (bst->lookup(55) == 10);
+
+    //Testing Remove
+    bst->remove(90);
+    REQUIRE (!bst->contains(90));
+    REQUIRE (bst->size() == 7);
+    REQUIRE (bst->height() == 4);
+    REQUIRE (bst->balance() == -1);
+
+    bst->remove(50);
+    REQUIRE (!bst->contains(50));
+    REQUIRE (bst->size() == 6);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == 0);
+
+    bst->remove(49);
+    REQUIRE (!bst->contains(50));
+    REQUIRE (bst->size() == 5);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == 0);
+
+    bst->remove(48);
+    REQUIRE (!bst->contains(48));
+    REQUIRE (bst->size() == 4);
+    REQUIRE (bst->height() == 3);
+    REQUIRE (bst->balance() == -1);
+
+    bst->remove(40);
+    REQUIRE (!bst->contains(40));
+    REQUIRE (bst->size() == 3);
+    REQUIRE (bst->height() == 2);
+    REQUIRE (bst->balance() == 0);
 
     delete bst;
 

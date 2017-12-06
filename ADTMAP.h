@@ -196,14 +196,12 @@ public:
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                std::cout << "HERE\n";
             node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
             curr->priority = temp_curr->priority;
             curr->data = temp_curr->data;
-            if (curr->left == temp_curr)
-                curr->left = nullptr;
-            else
-                curr->right = nullptr;
+            curr->left = temp_curr->left;
+            curr->right = temp_curr->right;
+            temp_curr = nullptr;
             delete temp_curr;
         }
         //Third Case: The node has two children
@@ -255,16 +253,13 @@ public:
             //Second Case: The node has one child
             //Replace the current node with it's child
             else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                    std::cout << "HERE: " << curr->priority << "\n";
-               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
-                if (parent->left == curr) {
-                    parent->left = nullptr;
-                    parent->left = (curr->left ? curr->left : curr->right);
-                }
-                else {
-                    parent->right = nullptr;
-                    parent->right = (curr->left ? curr->left : curr->right);
-                }
+                node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                curr->priority = temp_curr->priority;
+                curr->data = temp_curr->data;
+                curr->left = temp_curr->left;
+                curr->right = temp_curr->right;
+                temp_curr = nullptr;
+                delete temp_curr;
             }
             //Third Case: The node has two children
             //Find the in-order successor and swap positions, later deleting the needed node
@@ -283,7 +278,7 @@ public:
                 remove_node (min, parent);
             }
 
-            in_order_traversal_iter (root);
+           // in_order_traversal_iter (root);
         }
 
     //Additional Functions
@@ -627,14 +622,12 @@ public:
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                std::cout << "HERE\n";
             node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
             curr->priority = temp_curr->priority;
             curr->data = temp_curr->data;
-            if (curr->left == temp_curr)
-                curr->left = nullptr;
-            else
-                curr->right = nullptr;
+            curr->left = temp_curr->left;
+            curr->right = temp_curr->right;
+            temp_curr = nullptr;
             delete temp_curr;
         }
         //Third Case: The node has two children
@@ -694,16 +687,13 @@ public:
             //Second Case: The node has one child
             //Replace the current node with it's child
             else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                    std::cout << "HERE: " << curr->priority << "\n";
-               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
-                if (parent->left == curr) {
-                    parent->left = nullptr;
-                    parent->left = (curr->left ? curr->left : curr->right);
-                }
-                else {
-                    parent->right = nullptr;
-                    parent->right = (curr->left ? curr->left : curr->right);
-                }
+                node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                curr->priority = temp_curr->priority;
+                curr->data = temp_curr->data;
+                curr->left = temp_curr->left;
+                curr->right = temp_curr->right;
+                temp_curr = nullptr;
+                delete temp_curr;
             }
             //Third Case: The node has two children
             //Find the in-order successor and swap positions, later deleting the needed node
@@ -983,34 +973,44 @@ public:
         }
         if (!equal(curr->priority, a))
             throw std::runtime_error ("remove: the key does not equate to a value\n");
+
+/*
+        if (a == 'h') {
+            if (curr->left) std::cout << "yes left\n";
+            if (curr->right)  std::cout << "yes right\n";
+        }
+*/
+
         //First Case: The node has no children
         //Just delete directly
         if (!curr->left && !curr->right) {
+                std::cout << "no child\n";
             if (temp->right == curr) {
                 temp->right = nullptr;
             }
             else {
                 temp->left = nullptr;
             }
+            curr->left = nullptr;
+            curr->right = nullptr;
             delete curr;
         }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-               // std::cout << "HERE\n";
             node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
             curr->priority = temp_curr->priority;
             curr->data = temp_curr->data;
-            if (curr->left == temp_curr)
-                curr->left = nullptr;
-            else
-                curr->right = nullptr;
+            curr->left = temp_curr->left;
+            curr->right = temp_curr->right;
+            temp_curr = nullptr;
             delete temp_curr;
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
 
         else {
+                 std::cout << "two child\n";
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
@@ -1044,34 +1044,33 @@ public:
     void remove_node (node<key,value> * curr, node<key,value> * parent) {
             if (!curr)
                 return;
-            if (!curr->left && !curr->right) {
+            if (!curr->left && !curr->right)
+                { std::cout << "no child\n";
                 if (parent->right == curr) {
                     parent->right = nullptr;
                 }
                 else {
                     parent->left = nullptr;
                 }
-                curr = nullptr;
+                curr->left = nullptr;
+                curr->right = nullptr;
                 delete curr;
             }
             //Second Case: The node has one child
             //Replace the current node with it's child
             else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                    //std::cout << "HERE: " << curr->priority << "\n";
-               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
-                if (parent->left == curr) {
-                    parent->left = nullptr;
-                    parent->left = (curr->left ? curr->left : curr->right);
-                }
-                else {
-                    parent->right = nullptr;
-                    parent->right = (curr->left ? curr->left : curr->right);
-                }
+                node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                curr->priority = temp_curr->priority;
+                curr->data = temp_curr->data;
+                curr->left = temp_curr->left;
+                curr->right = temp_curr->right;
+                temp_curr = nullptr;
+                delete temp_curr;
             }
             //Third Case: The node has two children
             //Find the in-order successor and swap positions, later deleting the needed node
-            ///FIX
             else {
+                     std::cout << "two child\n";
                 node<key,value> * min = in_order_successor(curr->right);
                 //Swap the data of the nodes
                 curr->data = min->data;
@@ -1173,7 +1172,6 @@ public:
     signed int balance () {
         return recursive_height(root->left) - recursive_height(root->right);
     }
-
 
 };
 
@@ -1302,6 +1300,7 @@ public:
     //Balance the tree on every insert
     void fixer_upper (node<key,value> *& a) {
         signed int balance_number = balance_factor(a);
+        std::cout << "\n balance number: " << balance_number << std::endl;
         //std::cout << "balance number: " << balance_number << "\n";
         //The tree is balanced or roughly balanced
         if (!balance_number || balance_number == 1 || balance_number == -1)
@@ -1309,25 +1308,26 @@ public:
         //See which tree is bigger with node bounding checks to avoid segmentation faults
         //Left subtree is bigger
         if (balance_number > 1) {
-            if (!a->left->left)
+            if (a->left->left && !a->left->right) {
+                    std::cout << "HITTING\n";
+                ll(a);}
+            else if (a->left->right && !a->left->left)
                 lr(a);
-            else if (!a->left->right)
-                ll(a);
             else if (comp(a->left->left->priority, a->left->right->priority))
-                ll(a);
-            else
                 lr(a);
+            else
+                ll(a);
         }
         //Right subtree is bigger
         else {
-            if (!a->right->right)
+            if (a->right->right && !a->right->left)
+                rr(a);
+            else if (a->right->left && !a->right->right)
                 rl(a);
-            else if (!a->right->left)
-                rr(a);
-            if (comp(a->right->right->priority, a->right->left->priority))
-                rr(a);
+            else if (comp(a->right->right->priority, a->right->left->priority))
+                rl(a);
             else
-                rl(a);
+                rr(a);
         }
     }
 
@@ -1339,6 +1339,8 @@ public:
             return;
         }
         recursive_insert (root, a, b);
+        in_order_traversal_iter (root);
+        std::cout << std::endl;
     }
 
     void recursive_insert (node<key,value> *& curr, key a, value b) {
@@ -1377,9 +1379,30 @@ public:
             throw std::runtime_error ("lookup: the key does not equate to a value\n");
     }
 
+    //Find a node recursively to fix the tree to be balanced
+    //a is the starting node which is the root
+    void recursively_fix_nodes (node<key,value> *& a, node<key,value> * b) {
+
+            std::cout << a->priority << "  ";
+
+        if (!a)
+            return;
+        if (equal(a->priority, b->priority)) {
+            fixer_upper(a);
+            return;
+        }
+        if (comp(a->priority, b->priority))
+            recursively_fix_nodes (a->left, b);
+        else
+            recursively_fix_nodes (a->right, b);
+        fixer_upper(a);
+    }
+
      void remove (key a) {
         if (!root)
             throw std::runtime_error ("remove: there are no elements in the map\n");
+        if (!contains(a))
+            throw std::runtime_error ("remove: that element is not in the map\n");
         //Create a temporary node to traverse the list
         node<key,value> * curr = root;
         node<key,value> * temp = curr;
@@ -1393,6 +1416,7 @@ public:
         //First Case: The node has no children
         //Just delete directly
         if (!curr->left && !curr->right) {
+            std::cout << "zero CHILD\n";
             if (temp->right == curr) {
                 temp->right = nullptr;
             }
@@ -1400,24 +1424,26 @@ public:
                 temp->left = nullptr;
             }
             delete curr;
+            recursively_fix_nodes(root, temp);
         }
         //Second Case: The node has one child
         //Replace the current node with it's child
         else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-                //std::cout << "HERE\n";
+                if (a == 50) std::cout << "ONE CHILD\n";
             node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
             curr->priority = temp_curr->priority;
             curr->data = temp_curr->data;
-            if (curr->left == temp_curr)
-                curr->left = nullptr;
-            else
-                curr->right = nullptr;
+            curr->left = temp_curr->left;
+            curr->right = temp_curr->right;
+            temp_curr = nullptr;
             delete temp_curr;
+            recursively_fix_nodes(root, temp);
         }
         //Third Case: The node has two children
         //Find the in-order successor and swap positions, later deleting the needed node
 
         else {
+                if (a == 50) std::cout << "two CHILD\n";
             node<key,value> * min = in_order_successor(curr->right);
             //Swap the data of the nodes
             curr->data = min->data;
@@ -1431,7 +1457,9 @@ public:
                 parent = in_order_successor_second(curr->right);
             remove_node (min, parent);
         }
-        //in_order_traversal_iter (root);
+
+        std::cout << std::endl;
+        in_order_traversal_iter (root);
     }
 
     //Find the in-order successor of a node, or the minimum of the right sub-tree
@@ -1463,20 +1491,16 @@ public:
             //Second Case: The node has one child
             //Replace the current node with it's child
             else if ((curr->left || curr->right) && !(curr->left && curr->right)) {
-              //      std::cout << "HERE: " << curr->priority << "\n";
-               // node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
-                if (parent->left == curr) {
-                    parent->left = nullptr;
-                    parent->left = (curr->left ? curr->left : curr->right);
-                }
-                else {
-                    parent->right = nullptr;
-                    parent->right = (curr->left ? curr->left : curr->right);
-                }
+                node<key,value> * temp_curr = (curr->left ? curr->left : curr->right);
+                curr->priority = temp_curr->priority;
+                curr->data = temp_curr->data;
+                curr->left = temp_curr->left;
+                curr->right = temp_curr->right;
+                temp_curr = nullptr;
+                delete temp_curr;
             }
             //Third Case: The node has two children
             //Find the in-order successor and swap positions, later deleting the needed node
-            ///FIX
             else {
                 node<key,value> * min = in_order_successor(curr->right);
                 //Swap the data of the nodes
@@ -1490,7 +1514,7 @@ public:
                     parent = in_order_successor_second(curr->right);
                 remove_node (min, parent);
             }
-
+            fixer_upper(parent);
             in_order_traversal_iter (root);
         }
 
@@ -1555,6 +1579,14 @@ public:
        }
     }
 
+    void in_order_traversal_iter (node<key,value> * a) {
+        if (a) {
+            in_order_traversal_iter(a->left);
+            std::cout << a->priority << "  ";
+            in_order_traversal_iter(a->right);
+        }
+    }
+
 };
 
 
@@ -1566,11 +1598,4 @@ class HASHOPEN {
 };
 
 }
-
-///TODO::
-    ///Today: Part 2
-    ///Monday: Part 3 & Write Test Cases CATCH
-    ///Tuesday: Part 4 & Write Test Cases CATCH
-    ///Wednesday: Finishing Touches
-
 #endif // ADTMAP_H_INCLUDED

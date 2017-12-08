@@ -10,7 +10,6 @@ COP3530 Project 2
 -HASHBUCKET: hash map using buckets/linked-list
 
 //TODO::
--Fix HASHBUCKET & Test Cases
 -Iterators
 -Test Big 5
 -Memory Leaks

@@ -23,7 +23,7 @@ public:
 ///TODO: Big 5, Iterator
 
 	HASHOPEN (size_t inputted_capacity = DEFAULT) {
-		hash_table = new KVPair<key,value> * [inputted_capacity] ();
+		hash_table = new KVPair<key,value> * [inputted_capacity + 1] ();
 		capacity_arr = inputted_capacity;
 	}
 
@@ -88,7 +88,7 @@ public:
 
 	size_t size () {
         size_t temp_size = 0;
-        for (int i = 0; i < capacity () ; ++i) {
+        for (int i = 0; i < capacity () + 1 ; ++i) {
             if (hash_table[i]) {
                // std::cout << hash_table[i]->get_key() << "" << i << " ";
                 temp_size++;
@@ -115,7 +115,7 @@ public:
             size_t temp_key = 1;
             while (hash_table[curr_index]) {
                 //Quadratic Probing
-                curr_index = (curr_index + temp_key * temp_key) % capacity() ;
+                curr_index = (curr_index + temp_key * temp_key) % (capacity() + 1) ;
                 temp_key++;
             }
             hash_table[curr_index] = new KVPair<key,value> (a, b);
@@ -141,7 +141,7 @@ public:
                         return;
                     }
                 //Quadratic Probing
-                curr_index = (curr_index + temp_probe * temp_probe) % capacity() ;
+                curr_index = (curr_index + temp_probe * temp_probe) % (capacity() + 1) ;
                 temp_probe++;
             }
         }
@@ -168,7 +168,7 @@ public:
                 }
                 else {
                     //Quadratic Probing
-                    curr_index = (curr_index + temp_probe * temp_probe) % capacity() ;
+                    curr_index = (curr_index + temp_probe * temp_probe) % (capacity() + 1) ;
                     temp_probe++;
                 }
             }
@@ -179,49 +179,51 @@ public:
         size_t curr_index = hash(a);
         if (hash_table[curr_index] && equal(hash_table[curr_index]->get_key(), a))
             return true;
-        else {
-          /*  size_t temp_probe = 1;
+        /*else {
+            size_t temp_probe = 1;
+
             while (hash_table[curr_index]) {
-                if (hash_table[curr_index] &&  equal(hash_table[curr_index]->get_key(), a))
+                if (equal(hash_table[curr_index]->get_key(), a))
                     return true;
                 else {
                     //Quadratic Probing
-                    curr_index = (curr_index + temp_probe * temp_probe) % capacity() ;
+                    curr_index = (curr_index + temp_probe * temp_probe) % (capacity() + 1) ;
                     temp_probe++;
                 }
-            }*/
-            for (int i = 0; i < capacity (); ++i) {
+            } */
+            //Using O (n) contains because removing a value beforehand will halt
+            //the quadratic probing and make it seem like the key is not there when it is
+            for (int i = 0; i < capacity () + 1; ++i) {
                 if (hash_table[i] && equal(hash_table[i]->get_key(), a))
                     return true;
             }
-        }
+
 
         return false;
 	}
 
 	void clear () {
         //Delete all the items
-        for (int i = 0; i < capacity (); ++i) {
+        for (int i = 0; i < capacity () + 1; ++i) {
             if (hash_table[i]) {
                 delete hash_table[i];
             }
         }
         delete [] hash_table;
-        hash_table = new KVPair<key,value> * [capacity_arr] ();
+        hash_table = new KVPair<key,value> * [capacity_arr + 1] ();
 	}
 
 	bool is_full () {
-        return size() == capacity();
+        return size() >= capacity();
 	}
 
 	bool is_empty () {
         return size() == 0;
 	}
 
-
 	void print ()
 	{
-	    for (int i = 0; i < capacity (); ++i ) {
+	    for (int i = 0; i < capacity () + 1; ++i ) {
             if (hash_table[i])
                 std::cout << hash_table[i]->get_key() << " ; ";
             else
@@ -230,7 +232,12 @@ public:
 	    std::cout << "\n";
 	}
 	///TODO: Implement Iterator
-
+    void test () {
+        for (int i = 0; i  < capacity () + 1; ++i) {
+            if (!hash_table[i])
+                std::cout << "FALSEFALSEFALSE\n\n";
+        }
+    }
 
 
 

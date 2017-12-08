@@ -36,6 +36,8 @@ public:
 	HASHBUCKET (size_t inputted_capacity = DEFAULT) {
 		hash_table = new hash_node<key,value> * [inputted_capacity];
 		capacity_arr = inputted_capacity;
+		for (int i = 0; i < capacity_arr; ++i)
+            hash_table[i] = nullptr;
 	}
 
 	~HASHBUCKET () {
@@ -105,23 +107,23 @@ public:
 	size_t capacity () {
 		return capacity_arr;
 	}
-    ///Fault
+
 	size_t size () {
         size_t temp_size = 0;
         for (int i = 0; i < capacity () ; ++i) {
             if (hash_table[i]) {
+                ++temp_size;
                 if (hash_table[i]->next) {
                     hash_node<key,value> * temp = hash_table[i];
+                    temp = temp->next;
                     while (temp) {
-                        temp = temp->next;
                         ++temp_size;
+                        temp = temp->next;
                     }
-                }
-                else {
-                    ++temp_size;
                 }
             }
         }
+
         return temp_size;
 	}
 
@@ -134,21 +136,22 @@ public:
         if (is_full())
             throw std::runtime_error ("insert: hash table is full, cannot insert.\n");
         size_t curr_index = hash(a);
-        std::cout << curr_index << "\n";
         if (!hash_table[curr_index]) {
-            std::cout << "hi\n";
             hash_table[curr_index] = new hash_node<key,value>();
             hash_table[curr_index]->data = b;
             hash_table[curr_index]->priority = a;
         }
         else {
-
             hash_node<key,value> * temp = hash_table[curr_index];
-            while (temp)
+            while (temp) {
+                if (!temp->next) {
+                    temp->next = new hash_node<key,value>();
+                    temp->next->data = b;
+                    temp->next->priority = a;
+                    break;
+                }
                 temp = temp->next;
-            temp = new hash_node<key,value>();
-            temp->data = b;
-            temp->priority = a;
+            }
         }
 	}
 
@@ -156,7 +159,14 @@ public:
         if (!contains (a))
             throw std::runtime_error ("remove: value not found\n");
         size_t curr_index = hash(a);
-        if (hash_table[curr_index]) {
+        if (equal(hash_table[curr_index]->priority, a)) {
+            hash_node<key,value> * temp = hash_table[curr_index];
+            temp = temp->next;
+            hash_table[curr_index] = nullptr;
+            delete hash_table[curr_index];
+            hash_table[curr_index] = temp;
+        }
+        else {
             hash_node<key,value> * temp = hash_table[curr_index];
             hash_node<key,value> * prev = temp;
             while (!equal(temp->priority, a)) {
@@ -214,7 +224,9 @@ public:
             }
         }
         delete [] hash_table;
-        hash_table = new hash_node<key,value> * [capacity_arr];
+        hash_table = new hash_node<key,value> * [capacity()];
+        for (int i = 0; i < capacity(); ++i)
+            hash_table[i] = nullptr;
 	}
 
 	//Linked List is never full

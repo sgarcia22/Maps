@@ -401,6 +401,59 @@ TEST_CASE( "BSTLEAF_ITER" ) {
 TEST_CASE( "HASHOPEN" ) {
 
     cop3530::HASHOPEN<int,int, &hash_func, &equality> * hash_map = new cop3530::HASHOPEN<int,int, &hash_func, &equality> ();
+    hash_arr_size = hash_map->capacity() + 1;
+
+    hash_map->insert(1, 3);
+
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 1);
+    REQUIRE (hash_map->contains(1));
+    REQUIRE (hash_map->lookup(1) == 3);
+
+    hash_map->insert(5, 10);
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 2);
+    REQUIRE (hash_map->contains(5));
+    REQUIRE (hash_map->lookup(5) == 10);
+
+    hash_map->clear();
+
+    for (int i = 1; i <= 127; ++i)
+        hash_map->insert(i, i + 10);
+
+ //   hash_map->test();
+
+    REQUIRE (hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 127);
+
+    for (int i = 1; i <= 127; ++i) {
+        REQUIRE (hash_map->contains(i));
+        REQUIRE (hash_map->lookup(i) == i + 10);
+    }
+
+    REQUIRE (hash_map->load() == 1);
+
+    for (int i = 1; i <= 127; ++i) {
+        std::cout << i << "  " << hash_map->lookup (i) << "\n";
+        hash_map->remove(i);
+        REQUIRE (!hash_map->contains (i));
+        try {
+            hash_map->lookup (i);
+        }
+        catch (std::runtime_error e) {}
+        REQUIRE (hash_map->size() == 127 - i);
+    }
+
+    delete hash_map;
+
+}
+
+TEST_CASE( "HASHBUCKET" ) {
+
+    cop3530::HASHBUCKET<int,int, &hash_func, &equality> * hash_map = new cop3530::HASHBUCKET<int,int, &hash_func, &equality> ();
     hash_arr_size = hash_map->capacity();
 
     hash_map->insert(1, 3);
@@ -423,7 +476,6 @@ TEST_CASE( "HASHOPEN" ) {
     for (int i = 1; i <= 127; ++i)
         hash_map->insert(i, i + 10);
 
-    REQUIRE (hash_map->is_full());
     REQUIRE (!hash_map->is_empty());
     REQUIRE (hash_map->size() == 127);
 
@@ -444,60 +496,13 @@ TEST_CASE( "HASHOPEN" ) {
         REQUIRE (hash_map->size() == 127 - i);
     }
 
-    //hash_map->print ();
+     for (int i = 1; i <= 500; ++i) {
+        hash_map->insert(i, i + 10);
+        REQUIRE (hash_map->contains(i));
+        REQUIRE (hash_map->lookup(i) == i + 10);
+    }
 
     delete hash_map;
-
-}
-
-TEST_CASE( "HASHBUCKET" ) {
-
-    cop3530::HASHBUCKET<int,int, &hash_func, &equality> * hash_map = new cop3530::HASHBUCKET<int,int, &hash_func, &equality> ();
-    hash_arr_size = hash_map->capacity();
-
-    hash_map->insert(1, 3);
-
-    REQUIRE (!hash_map->is_full());
-    REQUIRE (!hash_map->is_empty());
-  /*  REQUIRE (hash_map->size() == 1);
-    REQUIRE (hash_map->contains(1));
-    REQUIRE (hash_map->lookup(1) == 3);
-
-    hash_map->insert(5, 10);
-    REQUIRE (!hash_map->is_full());
-    REQUIRE (!hash_map->is_empty());
-    REQUIRE (hash_map->size() == 2);
-    REQUIRE (hash_map->contains(5));
-    REQUIRE (hash_map->lookup(5) == 10);
-
-    hash_map->clear();
-
-    for (int i = 1; i <= 127; ++i)
-        hash_map->insert(i, i + 10);
-
-    REQUIRE (!hash_map->is_empty());
-    REQUIRE (hash_map->size() == 127);
-
-    for (int i = 1; i <= 127; ++i) {
-        REQUIRE (hash_map->contains(i));
-        REQUIRE (hash_map->lookup(i) == i + 10);
-    }
-
-    REQUIRE (hash_map->load() == 1);
-
-    for (int i = 1; i <= 127; ++i) {
-        hash_map->remove(i);
-        REQUIRE (!hash_map->contains (i));
-        try {
-            hash_map->lookup (i);
-        }
-        catch (std::runtime_error e) {}
-        REQUIRE (hash_map->size() == 127 - i);
-    }*/
-
-
-///FIX
-  //  delete hash_map;
 
 }
 

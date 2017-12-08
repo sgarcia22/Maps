@@ -11,17 +11,25 @@ public:
 
     KVPair() {}
 
-    KVPair (key a, value b) : class_key (a) {
-        class_value = b;
+    KVPair (key a, value b) : class_key (a), class_value (b) {
     }
 
-    key get_key () {
+    key get_key () const {
         return class_key;
     }
 
-    key get_value () {
+    key & get_value () {
         return class_value;
     }
+
+    void set_key (key a) {
+        class_key = a;
+    }
+
+    void set_value (value a) {
+        class_value = a;
+    }
+
 
 private:
     key class_key;

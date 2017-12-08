@@ -327,8 +327,9 @@ public:
             in_order_traversal_iter(a->right);
         }
     }
-/*
+
     //Iterator Implementation using In-Order Traversal
+   //Iterator Implementation using In-Order Traversal
 ///Const still does not work
 public:
     template<typename keyT, typename valueT>
@@ -340,18 +341,18 @@ public:
         using self_type = BSTLEAF_Iter<keyT,valueT>;
         using self_reference = BSTLEAF_Iter<keyT,valueT>& ;
         using pointer = KVPair<keyT, valueT>*;
-        using node_pointer = Node<KVPair<key,value>*>*;
+        using node_pointer = cop3530::SSLL<pointer>*;
     private:
         node_pointer curr;
 
     public:
         explicit BSTLEAF_Iter<keyT,valueT> (cop3530::SSLL<KVPair<key,value>*> * start) : curr(start) {}
-        //BSTLEAF_Iter (const BSTLEAF_Iter(node_pointer) & src) : curr (src.curr) {}
+        BSTLEAF_Iter (const cop3530::SSLL<KVPair<key,value const>*> & src) : curr (src.curr) {}
 
         //Return the key
-        pointer  operator*() const {return curr->data;}
+        pointer  operator*() const {return curr->peek_front();}
         //Return the KVPair Object
-        pointer operator->() const {return curr->data;}
+        pointer operator->() const {return curr->peek_front();}
 
         self_reference operator=(BSTLEAF_Iter const & src) {
             if (this == src)
@@ -361,21 +362,21 @@ public:
         }
         //Pre-increment operator overload
         self_reference operator++() {
-            curr = curr->next;
+            curr->pop_front();
             return *this;
         }
         //Post-increment operator overload
         self_reference operator++ (int) {
             self_type temp (*this);
-            curr = curr->next;
+            curr->pop_front();
             return temp;
         }
 
         bool operator==(BSTLEAF_Iter<keyT, valueT> const& rhs) const {
-            return curr == rhs.curr;
+            return curr->is_empty() == rhs.curr->is_empty();
         }
         bool operator!=(BSTLEAF_Iter<keyT, valueT> const& rhs) const {
-			return curr != rhs.curr;
+			return curr->is_empty() != rhs.curr->is_empty();
 		}
     };
     //Type aliases
@@ -385,9 +386,9 @@ public:
     using iterator = BSTLEAF_Iter<key_type, value_type>;
     using const_iterator = BSTLEAF_Iter<key_type, value_type const>;
 
-  /*  iterator begin () {
-		Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
-		in_order_traversal_iter(root, KV_pair);
+    iterator begin () {
+		cop3530::SSLL<KVPair<key,value>*> * KV_pair = new cop3530::SSLL<KVPair<key,value>*> ();
+		in_order_traversal_iter_bstleaf(root, KV_pair);
 		return iterator (KV_pair);
     }
     //When the list is empty the iterator has finished
@@ -397,25 +398,26 @@ public:
     }
 
     const_iterator begin () const {
-        Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
-		in_order_traversal_iter(root, KV_pair);
-		return const_iterator (KV_pair);
+        cop3530::SSLL<KVPair<key,value>*> * KV_pair = new cop3530::SSLL<KVPair<key,value>*> ();
+		in_order_traversal_iter_bstleaf(root, KV_pair);
+        const cop3530::SSLL<KVPair<key,value const>*> * KV_pair_const = KV_pair;
+		return const_iterator (KV_pair_const);
     }
+
     const_iterator end () const {
-        Node<KVPair<key,value>*> * KV_pair = new Node<KVPair<key,value>*> ();
+        const cop3530::SSLL<KVPair<key,const value>*> * KV_pair = new cop3530::SSLL<KVPair<key,const value>*> ();
 		return const_iterator (KV_pair);
     }
 
-    void in_order_traversal_iter (node<key,value> * a, Node<KVPair<key,value>*> *& node_iter) const {
+    void in_order_traversal_iter_bstleaf (node<key,value> * a, cop3530::SSLL<KVPair<key, value>*> * b) {
         if (a) {
-            in_order_traversal_iter(a->left, node_iter);
+            in_order_traversal_iter_bstleaf(a->left, b);
+            //Make a new KV element
             KVPair<key,value> * temp = new KVPair<key,value> (a->priority, a->data);
-            node_iter->data = temp;
-            node_iter = node_iter->next;
-            in_order_traversal_iter(a->right, node_iter);
+            b->push_back (temp);
+            in_order_traversal_iter_bstleaf(a->right, b);
         }
     }
-*/
 };
 }
 #endif

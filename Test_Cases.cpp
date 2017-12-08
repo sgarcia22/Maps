@@ -2,12 +2,18 @@
 #define CATCH_CONFIG_MAIN
 
 #include <iostream>
+#include <stdexcept>
 #include "catch.hpp"
 //#include "ADTMAP.h"
 #include "BSTLEAF.h"
 #include "BSTROOT.h"
 #include "BSTRAND.h"
 #include "AVL.h"
+#include "HASHOPEN.h"
+#include "HASHBUCKET.h"
+#define FIBONACCI_NUMBER 0.618033887
+
+size_t hash_arr_size;
 
 template <typename element>
 bool compare (element a, element b) {
@@ -17,6 +23,12 @@ bool compare (element a, element b) {
 template <typename element>
 bool equality (element a, element b) {
     return (a == b);
+}
+
+template <typename key>
+//Fibonacci Hash Function
+size_t hash_func (key a) {
+    return floor(hash_arr_size * (a * FIBONACCI_NUMBER - floor(a * FIBONACCI_NUMBER)));
 }
 
 TEST_CASE( "BSTLEAF" ) {
@@ -358,6 +370,134 @@ TEST_CASE( "AVL" ) {
 
 TEST_CASE( "BSTLEAF_ITER" ) {
 
+    cop3530::BSTLEAF<int,int, &compare, &equality> * bst = new cop3530::BSTLEAF<int,int, &compare, &equality> ();
+    bst->insert(5,3);
+    bst->insert(10,3);
+    bst->insert(2,3);
+    bst->insert(8,3);
 
+    int temp_contents [4] = {2, 5, 8, 10};
+
+    int index = 0;
+
+    for (cop3530::BSTLEAF<int, int, &compare, &equality>::iterator it = bst->begin(); it != bst->end(); ++it) {
+        REQUIRE (temp_contents[index++] == (*it)->get_key());
+    }
+
+    index = 0;
+
+    //Test Constant Iterator
+   // cop3530::BSTLEAF<int, int const, &compare, &equality> * bst_const  = bst;
+
+  //  for (cop3530::BSTLEAF<int, int, &compare, &equality>::const_iterator it = bst->begin(); it != bst->end(); ++it) {
+  //      REQUIRE (temp_contents[index++] == (*it)->get_key());
+  //  }
+
+    delete bst;
 
 }
+
+///Implement string hash function as well
+TEST_CASE( "HASHOPEN" ) {
+
+    cop3530::HASHOPEN<int,int, &hash_func, &equality> * hash_map = new cop3530::HASHOPEN<int,int, &hash_func, &equality> ();
+    hash_arr_size = hash_map->capacity();
+
+    hash_map->insert(1, 3);
+
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 1);
+    REQUIRE (hash_map->contains(1));
+    REQUIRE (hash_map->lookup(1) == 3);
+
+    hash_map->insert(5, 10);
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 2);
+    REQUIRE (hash_map->contains(5));
+    REQUIRE (hash_map->lookup(5) == 10);
+
+    hash_map->clear();
+
+    for (int i = 1; i <= 127; ++i)
+        hash_map->insert(i, i + 10);
+
+    REQUIRE (hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 127);
+
+    for (int i = 1; i <= 127; ++i) {
+        REQUIRE (hash_map->contains(i));
+        REQUIRE (hash_map->lookup(i) == i + 10);
+    }
+
+    REQUIRE (hash_map->load() == 1);
+
+    for (int i = 1; i <= 127; ++i) {
+        hash_map->remove(i);
+        REQUIRE (!hash_map->contains (i));
+        try {
+            hash_map->lookup (i);
+        }
+        catch (std::runtime_error e) {}
+        REQUIRE (hash_map->size() == 127 - i);
+    }
+
+    //hash_map->print ();
+
+    delete hash_map;
+
+}
+
+TEST_CASE( "HASHBUCKET" ) {
+
+    cop3530::HASHBUCKET<int,int, &hash_func, &equality> * hash_map = new cop3530::HASHBUCKET<int,int, &hash_func, &equality> ();
+    hash_arr_size = hash_map->capacity();
+
+    hash_map->insert(1, 3);
+
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+  /*  REQUIRE (hash_map->size() == 1);
+    REQUIRE (hash_map->contains(1));
+    REQUIRE (hash_map->lookup(1) == 3);
+
+    hash_map->insert(5, 10);
+    REQUIRE (!hash_map->is_full());
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 2);
+    REQUIRE (hash_map->contains(5));
+    REQUIRE (hash_map->lookup(5) == 10);
+
+    hash_map->clear();
+
+    for (int i = 1; i <= 127; ++i)
+        hash_map->insert(i, i + 10);
+
+    REQUIRE (!hash_map->is_empty());
+    REQUIRE (hash_map->size() == 127);
+
+    for (int i = 1; i <= 127; ++i) {
+        REQUIRE (hash_map->contains(i));
+        REQUIRE (hash_map->lookup(i) == i + 10);
+    }
+
+    REQUIRE (hash_map->load() == 1);
+
+    for (int i = 1; i <= 127; ++i) {
+        hash_map->remove(i);
+        REQUIRE (!hash_map->contains (i));
+        try {
+            hash_map->lookup (i);
+        }
+        catch (std::runtime_error e) {}
+        REQUIRE (hash_map->size() == 127 - i);
+    }*/
+
+
+///FIX
+  //  delete hash_map;
+
+}
+

@@ -6,9 +6,11 @@ COP3530 Project 2
 -BSTROOT: inserts at root
 -BSTRAND: inserts randomly
 -AVL: inserts then balances
+-HASHOPEN: open-addressing hash map
+-HASHBUCKET: hash map using buckets/linked-list
 
 //TODO::
--Part 2: Iterators -> Not working, problem with const
--Part 3: Hashtable-Based Maps
-
-*Finish CATCH Test Cases & Thoroughly Test
+-Fix HASHBUCKET & Test Cases
+-Iterators
+-Test Big 5
+-Memory Leaks

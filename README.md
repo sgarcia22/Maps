@@ -9,7 +9,9 @@ COP3530 Project 2
 -HASHOPEN: open-addressing hash map
 -HASHBUCKET: hash map using buckets/linked-list
 
-//TODO::
+-Was not able to implement on time:
 -Iterators
--Test Big 5
--Memory Leaks
+-Move/Copy Constructors/Assignments
+
+
+-TA's Test Cases were not working with my code

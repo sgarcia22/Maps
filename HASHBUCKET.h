@@ -16,7 +16,7 @@ struct hash_node {
 
 namespace cop3530 {
 
-template <typename key, typename value, size_t (*hash) (key),  bool (*equal) (key, key)>
+template <typename key, typename value, size_t (*hash) (const key &),  bool (*equal) (const key &, const key &)>
 //Hash Map with Open Addressing
 class HASHBUCKET {
 
@@ -148,6 +148,9 @@ public:
                     temp->next = new hash_node<key,value>();
                     temp->next->data = b;
                     temp->next->priority = a;
+                    temp = temp->next;
+                    temp = nullptr;
+                    delete temp;
                     break;
                 }
                 temp = temp->next;
@@ -162,11 +165,12 @@ public:
         if (equal(hash_table[curr_index]->priority, a)) {
             hash_node<key,value> * temp = hash_table[curr_index];
             temp = temp->next;
-            hash_table[curr_index] = nullptr;
             delete hash_table[curr_index];
+            hash_table[curr_index] = nullptr;
             hash_table[curr_index] = temp;
         }
         else {
+
             hash_node<key,value> * temp = hash_table[curr_index];
             hash_node<key,value> * prev = temp;
             while (!equal(temp->priority, a)) {

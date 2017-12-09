@@ -9,7 +9,7 @@
 
 namespace cop3530 {
 
-template <typename key, typename value, size_t (*hash) (key),  bool (*equal) (key, key)>
+template <typename key, typename value, size_t (*hash) (const key &),  bool (*equal) (const key &, const key &)>
 //Hash Map with Open Addressing
 class HASHOPEN {
 
@@ -90,11 +90,9 @@ public:
         size_t temp_size = 0;
         for (int i = 0; i < capacity () + 1 ; ++i) {
             if (hash_table[i]) {
-               // std::cout << hash_table[i]->get_key() << "" << i << " ";
                 temp_size++;
             }
         }
-      //  std::cout << "\n size " << temp_size ;
         return temp_size;
 	}
 
@@ -108,7 +106,7 @@ public:
             throw std::runtime_error ("insert: hash table is full, cannot insert.\n");
         size_t curr_index = hash(a);
         if (!hash_table[curr_index]) {
-          //  std::cout << "hash table: " << curr_index << "\n";
+
             hash_table[curr_index] = new KVPair<key,value> (a, b);
         }
         else {
@@ -127,17 +125,17 @@ public:
             throw std::runtime_error ("remove: hash table does not have that key.\n");
         size_t curr_index = hash(a);
         if (hash_table[curr_index] && equal(hash_table[curr_index]->get_key(), a)) {
-            //std::cout << "size : " << size() << "  ";
-            hash_table[curr_index] = nullptr;
             delete hash_table[curr_index];
+            hash_table[curr_index] = nullptr;
         }
         else {
             size_t temp_probe = 1;
             while (true) {
                 if (hash_table[curr_index])
                     if (equal(hash_table[curr_index]->get_key(), a)) {
-                        hash_table[curr_index] = nullptr;
                         delete hash_table[curr_index];
+                        hash_table[curr_index] = nullptr;
+
                         return;
                     }
                 //Quadratic Probing
@@ -231,7 +229,7 @@ public:
 	    }
 	    std::cout << "\n";
 	}
-	///TODO: Implement Iterator
+
     void test () {
         for (int i = 0; i  < capacity () + 1; ++i) {
             if (!hash_table[i])
@@ -239,7 +237,74 @@ public:
         }
     }
 
+    //Iterator Implementation
+    template <typename keyT, typename valueT>
+    class HASHOPEN_Iter {
+    public:
+        //Iterator Compatibility
+        using iterator_category = std::forward_iterator_tag;
+        using iterator_category_const = const std::forward_iterator_tag;
+        using value_type = KVPair<keyT, valueT>;
+        using reference =  KVPair<keyT, valueT>&;
+        using pointer =  KVPair<keyT, valueT>*;
+        using difference_type = std::ptrdiff_t;
 
+        //Type aliases
+        using self_type = HASHOPEN_Iter;
+        using self_reference = HASHOPEN_Iter&;
+
+    private:
+        pointer * curr;
+
+    public:
+        explicit HASHOPEN_Iter<keyT,valueT> (KVPair<key,value> ** start = nullptr) : curr(start) {}
+       // HASHOPEN_Iter (const KVPair<keyT,valueT const> *& src) : curr (src.curr) {}
+
+        //Return the key
+        pointer  operator*() const {return (curr ? *curr : nullptr);}
+        //Return the KVPair Object
+        pointer operator->() const {return (curr ? curr : nullptr);}
+
+        self_reference operator=(HASHOPEN_Iter<keyT,valueT> const & src) {
+            if (this == src)
+                return *this;
+            curr = src.curr;
+            return *this;
+        }
+        //Pre-increment operator overload
+        self_reference operator++() {
+        //    while (! (*     curr))
+                ++curr;
+            return *this;
+        }
+        //Post-increment operator overload
+        self_reference operator++ (int) {
+            self_type temp (*this);
+          //  while (! (curr))
+                ++curr;
+            return temp;
+        }
+        //Boolean Overloaded Operators
+        bool operator==(HASHOPEN_Iter<keyT, valueT> const& rhs) const {
+            return (*curr) == (*rhs.curr);
+        }
+        bool operator!=(HASHOPEN_Iter<keyT, valueT> const& rhs) const {
+			return (*curr) != (*rhs.curr);
+			//(*curr)->get_key() != (*rhs.curr)->get_key();
+        }
+    };
+
+    using key_type = key;
+    using value_type = value;
+    using iterator = HASHOPEN_Iter<key_type, value_type>;
+    using const_iterator = HASHOPEN_Iter<key_type, value_type const>;
+
+    //Iterator begin and end functions
+    iterator begin () {return iterator(hash_table);}
+    iterator end () {return iterator(hash_table + capacity() + 1);}
+
+    const_iterator begin () const {return const_iterator(hash_table);}
+    const_iterator end () const {return const_iterator(hash_table + capacity() + 1);}
 
 };
 }

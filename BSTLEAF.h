@@ -13,7 +13,7 @@
 
 namespace cop3530 {
 
-template <typename key, typename value, bool (*comp) (key, key),  bool (*equal) (key, key)>
+template <typename key, typename value, bool (*comp) (const key &, const key &),  bool (*equal) (const key &, const key &)>
 //Insert at the leaf
 class BSTLEAF {
 private:
@@ -35,20 +35,21 @@ public:
         if (!orig.root)
             return;
 
-        node<key,value> temp = orig.root;
-        root = new node<key,value> ();
-        root->priority = temp->priority;
-        root->data = temp->priority;
+        root = orig.root;
+        root->priority = orig.root->priority;
+        root->data = orig.root->priority;
 
-        if (temp->left) {
-            root->left = make_copy (temp->left);
+        if (orig.root->left) {
+            node<key,value> * temp = orig.root->left;
+            root->left = make_copy (temp);
         }
-        if (temp->right) {
-            root->right = make_copy (temp->right);
+        if (orig.root->right) {
+            node<key,value> * temp = orig.root->right;
+            root->right = make_copy (temp);
         }
     }
 
-    node<key,value> * make_copy (const node<key,value> * a) {
+    node<key,value> * make_copy (node<key,value> * a) {
         if (!a)
             return nullptr;
         node<key,value> * temp = new node<key,value>();
@@ -87,6 +88,7 @@ public:
     }
 
     void insert (key a, value b) {
+
         if (!root) {
             root = new node<key,value> ();
             root->priority = a;
@@ -112,8 +114,25 @@ public:
                 temp->right = new node<key,value> ();
                 temp->right->priority = a;
                 temp->right->data = b;
+
             }
         }
+    }
+
+    void recursive_insert (node<key,value> * curr, key a, value b) {
+        if (!curr) {
+            curr = new node<key,value> ();
+            curr->priority = a;
+            curr->data = b;
+            return;
+        }
+        if (comp(curr->priority, a)) {
+            recursive_insert(curr->left, a, b);
+        }
+        else {
+            recursive_insert(curr->right, a, b);
+        }
+
     }
 
     value & lookup (key a) {
@@ -121,15 +140,34 @@ public:
             throw std::runtime_error ("lookup: there are no elements in the map\n");
         if (equal(root->priority,a))
             return root->data;
-        //Create a temporary node to traverse the list
+        return recursive_lookup (root, a);
+        /*//Create a temporary node to traverse the list
         node<key,value> * curr = root;
+
         //While there exists node and the node is not equal to the key
-        while ((curr->right || curr->left) && !equal(curr->priority, a))
+        while ((curr->right || curr->left) && !equal(curr->priority, a)) {
+           // std::cout << " KEY : " << a << " TESTING " << curr->priority << "\n";
             curr = (comp(curr->priority, a) ? curr->left : curr->right);
+        }
         if (equal(curr->priority, a))
             return curr->data;
         else
             throw std::runtime_error ("lookup: the key does not equate to a value\n");
+        */
+    }
+
+    value & recursive_lookup (node<key,value> * curr, key a) {
+        if (!curr)
+            throw std::runtime_error ("lookup: the key does not equate to a value\n");
+        if (equal (curr->priority, a)) {
+            return curr->data;
+        }
+        if (comp(curr->priority, a)) {
+            recursive_lookup(curr->left, a);
+        }
+        else {
+            recursive_lookup(curr->right, a);
+        }
     }
 
     void remove (key a) {
@@ -166,7 +204,6 @@ public:
             curr->data = temp_curr->data;
             curr->left = temp_curr->left;
             curr->right = temp_curr->right;
-            temp_curr = nullptr;
             delete temp_curr;
         }
         //Third Case: The node has two children
@@ -211,7 +248,6 @@ public:
                 else {
                     parent->left = nullptr;
                 }
-                curr = nullptr;
                 delete curr;
             }
             //Second Case: The node has one child
@@ -222,7 +258,6 @@ public:
                 curr->data = temp_curr->data;
                 curr->left = temp_curr->left;
                 curr->right = temp_curr->right;
-                temp_curr = nullptr;
                 delete temp_curr;
             }
             //Third Case: The node has two children
@@ -240,8 +275,6 @@ public:
                     parent = in_order_successor_second(curr->right);
                 remove_node (min, parent);
             }
-
-           // in_order_traversal_iter (root);
         }
 
     //Additional Functions
@@ -293,13 +326,13 @@ public:
     //Removes all of the nodes
     void clear () {
         remove_all (root);
+        root = nullptr;
     }
 
     void remove_all (node<key,value> *& a) {
        if (a) {
-            remove_all(a->left);
-            remove_all(a->right);
-            a = nullptr;
+            if (a->left) remove_all(a->left);
+            if (a->right) remove_all(a->right);
             delete a;
        }
     }
@@ -329,8 +362,8 @@ public:
     }
 
     //Iterator Implementation using In-Order Traversal
-   //Iterator Implementation using In-Order Traversal
-///Const still does not work
+    //Iterator Implementation using In-Order Traversal
+    ///Const still does not work
 public:
     template<typename keyT, typename valueT>
     class BSTLEAF_Iter {
@@ -347,7 +380,7 @@ public:
 
     public:
         explicit BSTLEAF_Iter<keyT,valueT> (cop3530::SSLL<KVPair<key,value>*> * start) : curr(start) {}
-        BSTLEAF_Iter (const cop3530::SSLL<KVPair<key,value const>*> & src) : curr (src.curr) {}
+      //  BSTLEAF_Iter (const cop3530::SSLL<KVPair<key,value const>*> & src) : curr (src.curr) {}
 
         //Return the key
         pointer  operator*() const {return curr->peek_front();}
@@ -389,6 +422,7 @@ public:
     iterator begin () {
 		cop3530::SSLL<KVPair<key,value>*> * KV_pair = new cop3530::SSLL<KVPair<key,value>*> ();
 		in_order_traversal_iter_bstleaf(root, KV_pair);
+		cop3530::SSLL<KVPair<key,value>*> * KV_pair_t = KV_pair;
 		return iterator (KV_pair);
     }
     //When the list is empty the iterator has finished
@@ -415,6 +449,8 @@ public:
             //Make a new KV element
             KVPair<key,value> * temp = new KVPair<key,value> (a->priority, a->data);
             b->push_back (temp);
+            temp = nullptr;
+            delete temp;
             in_order_traversal_iter_bstleaf(a->right, b);
         }
     }

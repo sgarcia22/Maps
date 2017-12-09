@@ -12,7 +12,7 @@
 
 namespace cop3530 {
 
-template <typename key, typename value, bool (*comp) (key, key),  bool (*equal) (key, key)>
+template <typename key, typename value, bool (*comp) (const key &, const key &),  bool (*equal) (const key &, const key &)>
 //Insert at the root
 class BSTROOT {
 
@@ -181,7 +181,6 @@ public:
             curr->data = temp_curr->data;
             curr->left = temp_curr->left;
             curr->right = temp_curr->right;
-            temp_curr = nullptr;
             delete temp_curr;
         }
         //Third Case: The node has two children
@@ -234,7 +233,6 @@ public:
                 else {
                     parent->left = nullptr;
                 }
-                curr = nullptr;
                 delete curr;
             }
             //Second Case: The node has one child
@@ -245,12 +243,10 @@ public:
                 curr->data = temp_curr->data;
                 curr->left = temp_curr->left;
                 curr->right = temp_curr->right;
-                temp_curr = nullptr;
                 delete temp_curr;
             }
             //Third Case: The node has two children
             //Find the in-order successor and swap positions, later deleting the needed node
-            ///FIX
             else {
                 node<key,value> * min = in_order_successor(curr->right);
                 //Swap the data of the nodes
@@ -315,13 +311,13 @@ public:
     //Removes all of the nodes
     void clear () {
         remove_all (root);
+        root = nullptr;
     }
 
     void remove_all (node<key,value> *& a) {
        if (a) {
             remove_all(a->left);
             remove_all(a->right);
-            a = nullptr;
             delete a;
        }
     }
